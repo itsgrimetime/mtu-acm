@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block title %}
   {% if request.endpoint == 'public_timeline' %}
-    Public Timeline
-  {% elif request.endpoint == 'user_timeline' %}
-    {{ profile_user.username }}'s Timeline
+    TechHacks Updates
+  {% elif request.endpoint == 'profile' %}
+    {{ g.user.name }}'s Profile
   {% else %}
-    My Timeline
+    My Profile
   {% endif %}
 {% endblock %}
 {% block body %}
@@ -13,7 +13,7 @@
   {% if g.user %}
     {% if request.endpoint == 'profile' %}
       <div class=followstatus>
-      {% if g.user.user_id == profile_user.user_id %}
+      {% if g.user.user_id == user.user_id %}
         Welcome {{ g.user.name }}!
       {% elif followed %}
         You are currently following this user.

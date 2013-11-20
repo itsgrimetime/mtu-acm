@@ -90,16 +90,21 @@ def before_request():
         g.user = query_db('select * from user where user_id = ?',
                           [session['user_id']], one=True)
 
+@app.route('/public')
+def public_timeline():
+    """Displays the latest updates from all teams."""
+    return render_template('profile.html', user_count=len(query_db('''
+	select * from user''')))
 
 @app.route('/')
 def profile():
     """Shows a users profile page or if no user is logged in it will
-    redirect to the public timeline.  This timeline shows the user's
+    redirect to the public main page.  This timeline shows the user's
     team info.
     """
     if not g.user:
         return redirect(url_for('public_timeline'))
-    return render_template('profile.html', team=query_db('''
+    return render_template('profile.html', user=g.user, team=query_db('''
 	select * from team where team_id= ?''', [g.user['team_id']], one=True))
 
 @app.route('/<email>')
