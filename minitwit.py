@@ -64,13 +64,17 @@ def query_db(query, args=(), one=False):
     rv = cur.fetchall()
     return (rv[0] if rv else None) if one else rv
 
-
 def get_user_id(email):
     """Convenience method to look up the id for a username."""
     rv = query_db('select user_id from user where email = ?',
                   [email], one=True)
     return rv[0] if rv else None
 
+def get_team_id(name):
+    """Convenience method to look up the id for a team."""
+    rv = query_db('select team_id from team where name = ?',
+	    [name], one=True)
+    return rv[0] if rv else None
 
 def format_datetime(timestamp):
     """Format a timestamp for display."""
@@ -163,9 +167,10 @@ def login():
 @app.route('/team_register', methods=['GET', 'POST'])
 def team_register():
     """Registers the team."""
+    error = None
     if not g.user:
-	error = "You need to be logged in to do that!"
-	return render_template('login.html', error=error)
+	flash('You need to be logged in to do that!')
+	return redirect(url_for('login'))
     if request.method == 'POST':
 	if not request.form['name']:
 	    error = 'You have to enter a valid team name'
@@ -174,6 +179,11 @@ def team_register():
 	else:
 	    db = get_db()
 	    db.execute('''insert into team (name) values (?)''', [request.form['name']])
+	    db.commit()
+	    team_id = get_team_id(request.form['name'])
+	    print team_id
+	    print g.user['user_id']
+	    db.execute('''update user set team_id = ? where user_id = ?''', [team_id, g.user['user_id']])
 	    db.commit()
 	    flash("You successfully registered {team_name}!".format(team_name=request.form['name']))
 	    return redirect(url_for('profile'))
@@ -189,7 +199,7 @@ def register():
 	if not request.form['name']:
 	    error = 'You have to enter a valid name'
         elif not request.form['email'] or \
-                 '@' not in request.form['email']:
+                 '@mtu.edu' not in request.form['email']:
             error = 'You have to enter a valid email address'
         elif not request.form['password']:
             error = 'You have to enter a password'
@@ -218,7 +228,6 @@ def logout():
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
-
 
 if __name__ == '__main__':
     init_db()
