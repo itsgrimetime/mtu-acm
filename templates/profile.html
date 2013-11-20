@@ -17,7 +17,7 @@
 	    View your team here.
 	    {% else %}
 	    You are not yet registered on a team!
-	    Register here.
+	    Register <a href="{{ url_for('team_register') }}">here</a>.
 	    {% endif %}
       </div>
     {% endif %}

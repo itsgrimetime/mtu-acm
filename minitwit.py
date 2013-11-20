@@ -160,11 +160,30 @@ def login():
             return redirect(url_for('profile'))
     return render_template('login.html', error=error)
 
+@app.route('/team_register', methods=['GET', 'POST'])
+def team_register():
+    """Registers the team."""
+    if not g.user:
+	error = "You need to be logged in to do that!"
+	return render_template('login.html', error=error)
+    if request.method == 'POST':
+	if not request.form['name']:
+	    error = 'You have to enter a valid team name'
+	elif get_team_id(request.form['name']) is not None:
+	    error = 'The username is already taken'
+	else:
+	    db = get_db()
+	    db.execute('''insert into team (name) values (?)''', [request.form['name']])
+	    db.commit()
+	    flash("You successfully registered {team_name}!".format(team_name=request.form['name']))
+	    return redirect(url_for('profile'))
+    return render_template('team_register.html', error=error)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Registers the user."""
     if g.user:
-        return redirect(url_for('timeline'))
+        return redirect(url_for('profile'))
     error = None
     if request.method == 'POST':
 	if not request.form['name']:
