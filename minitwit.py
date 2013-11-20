@@ -177,8 +177,6 @@ def login():
         return redirect(url_for('profile'))
     error = None
     if request.method == 'POST':
-	print "got post"
-	print "request form email {email}".format(email=request.form['email'])
         user = query_db('''select * from user where
             email = ?''', [request.form['email']], one=True)
         if user is None:
