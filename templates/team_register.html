@@ -4,9 +4,21 @@
   <h2>Sign Up</h2>
   {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
   <form action="" method=post>
+    Create a New Team:
     <dl>
-      <dt>Team Name:
-      <dd><input type=text name=name size=30 value="{{ request.form.name }}">
+
+	<dt>Team Name:</dt>
+	<dd><input type=text name=name size=30 value="{{ request.form.name }}"></dd>
+	<dt>Or Join an Existing One:</dt>
+
+	<dd>
+	<select>
+	<option name=name value="noteam">Select a Team</option>
+	{% for k, v in teams %}
+	    <option name=name value="{{ request.form.name }}">{{ v }}</option>
+	    {% endfor %}
+	</select>
+	</dd>
     </dl>
     <div class=actions><input type=submit value="Sign Up"></div>
   </form>

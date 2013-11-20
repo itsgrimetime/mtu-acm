@@ -188,7 +188,8 @@ def team_register():
 	    db.commit()
 	    flash("You successfully registered {team_name}!".format(team_name=request.form['name']))
 	    return redirect(url_for('profile'))
-    return render_template('team_register.html', error=error)
+    teams = query_db('select * from team')
+    return render_template('team_register.html', error=error, teams=teams)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
