@@ -107,53 +107,24 @@ def profile():
     return render_template('profile.html', user=g.user, team=query_db('''
 	select * from team where team_id= ?''', [g.user['team_id']], one=True))
 
-@app.route('/<email>')
-def user_profile(email):
-    """Display's a users tweets."""
-    profile_user = query_db('select * from user where email = ?',
-                            [username], one=True)
+@app.route('/user/<user_id>')
+def user_profile(user_id):
+    """Display's a users profile"""
+    profile_user = query_db('select * from user where user_id = ?',
+                            [user_id], one=True)
     if profile_user is None:
         abort(404)
     if g.user:
-        return render_template('timeline.html', messages=query_db('''
-            select message.*, user.* from message, user where
-            user.user_id = message.author_id and user.user_id = ?
-            order by message.pub_date desc limit ?''',
-            [profile_user['user_id'], PER_PAGE]), followed=followed,
-            profile_user=profile_user)
+        return render_template('profile.html', profile_user=profile_user)
 
-
-@app.route('/<username>/follow')
-def follow_user(username):
-    """Adds the current user as follower of the given user."""
-    if not g.user:
-        abort(401)
-    whom_id = get_user_id(username)
-    if whom_id is None:
-        abort(404)
-    db = get_db()
-    db.execute('insert into follower (who_id, whom_id) values (?, ?)',
-              [session['user_id'], whom_id])
-    db.commit()
-    flash('You are now following "%s"' % username)
-    return redirect(url_for('user_timeline', username=username))
-
-
-@app.route('/<username>/unfollow')
-def unfollow_user(username):
-    """Removes the current user as follower of the given user."""
-    if not g.user:
-        abort(401)
-    whom_id = get_user_id(username)
-    if whom_id is None:
-        abort(404)
-    db = get_db()
-    db.execute('delete from follower where who_id=? and whom_id=?',
-              [session['user_id'], whom_id])
-    db.commit()
-    flash('You are no longer following "%s"' % username)
-    return redirect(url_for('user_timeline', username=username))
-
+@app.route('/team/<team_id>')
+def team_profile(team_id):
+    """Display's a teams profile page."""
+    team = query_db('select * from team where team_id = ?', [team_id], one=True)
+    if team is None:
+	abort(404)
+    if g.user:
+	return render_template('team_profile.html', team=team)
 
 @app.route('/add_message', methods=['POST'])
 def add_message():
@@ -168,7 +139,6 @@ def add_message():
         db.commit()
         flash('Your message was recorded')
     return redirect(url_for('timeline'))
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -189,7 +159,6 @@ def login():
             session['user_id'] = user['user_id']
             return redirect(url_for('profile'))
     return render_template('login.html', error=error)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -220,14 +189,12 @@ def register():
             return redirect(url_for('login'))
     return render_template('register.html', error=error)
 
-
 @app.route('/logout')
 def logout():
     """Logs the user out."""
     flash('You were logged out')
     session.pop('user_id', None)
     return redirect(url_for('public_timeline'))
-
 
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime

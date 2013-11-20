@@ -13,25 +13,12 @@
   {% if g.user %}
     {% if request.endpoint == 'profile' %}
       <div class=followstatus>
-      {% if g.user.user_id == user.user_id %}
-        Welcome {{ g.user.name }}!
-      {% elif followed %}
-        You are currently following this user.
-        <a class=unfollow href="{{ url_for('unfollow_user', username=profile_user.username)
-          }}">Unfollow user</a>.
-      {% else %}
-        You are not yet following this user.
-        <a class=follow href="{{ url_for('follow_user', username=profile_user.username)
-          }}">Follow user</a>.
-      {% endif %}
-      </div>
-    {% elif request.endpoint == 'timeline' %}
-      <div class=twitbox>
-        <h3>What's on your mind {{ g.user.username }}?</h3>
-        <form action="{{ url_for('add_message') }}" method=post>
-          <p><input type=text name=text size=60><!--
-          --><input type=submit value="Share">
-        </form>
+	{% if g.user.team_id != None %}
+	    View your team here.
+	    {% else %}
+	    You are not yet registered on a team!
+	    Register here.
+	    {% endif %}
       </div>
     {% endif %}
   {% endif %}

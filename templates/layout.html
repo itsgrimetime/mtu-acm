@@ -2,7 +2,7 @@
 <title>{% block title %}Welcome{% endblock %} | MiniTwit</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-  <h1>MiniTwit</h1>
+  <h1>TechHacks</h1>
   <div class=navigation>
   {% if g.user %}
     <a href="{{ url_for('profile') }}">my profile</a> |
@@ -27,6 +27,6 @@
   {% block body %}{% endblock %}
   </div>
   <div class=footer>
-    MiniTwit &mdash; A Flask Application
+    TechHacks Registration &mdash; Built with Flask
   </div>
 </div>
