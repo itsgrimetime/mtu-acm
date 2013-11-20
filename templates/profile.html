@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}
   {% if request.endpoint == 'public_timeline' %}
-    TechHacks Updates
+  TechHacks Updates
   {% elif request.endpoint == 'profile' %}
     {{ g.user.name }}'s Profile
   {% else %}
@@ -9,7 +9,11 @@
   {% endif %}
 {% endblock %}
 {% block body %}
-  <h2>{{ self.title() }}</h2>
+<h2>{{ self.title() }}</h2>
+  {% if request.endpoint == 'public_timeline' %}
+      <p> Registered Users: {{ user_count }} </p>
+      <p> Registered Teams: {{ team_count }} </p>
+  {% endif %}
   {% if g.user %}
     {% if request.endpoint == 'profile' %}
       <div class=followstatus>

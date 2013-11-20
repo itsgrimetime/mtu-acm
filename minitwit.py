@@ -97,8 +97,9 @@ def before_request():
 @app.route('/public')
 def public_timeline():
     """Displays the latest updates from all teams."""
-    return render_template('profile.html', user_count=len(query_db('''
-	select * from user''')))
+    user_count = len(query_db("select * from user"))
+    team_count = len(query_db("select * from team"))
+    return render_template('profile.html', user_count=user_count, team_count=team_count)
 
 @app.route('/')
 def profile():
