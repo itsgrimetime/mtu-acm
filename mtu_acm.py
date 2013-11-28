@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-    MiniTwit
+    TechHacks Registration
     ~~~~~~~~
 
-    A microblogging application written with Flask and sqlite3.
+    A simple registration application written with Flask and sqlite3.
+
+    Written by: Mike Grimes
+
+    Modified from Armin Ronacher's "MiniTwit" Flask example application
+    which is:
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
@@ -18,14 +23,14 @@ from flask import Flask, request, session, url_for, redirect, \
 from werkzeug import check_password_hash, generate_password_hash
 
 # configuration
-DATABASE = '/tmp/minitwit.db'
+DATABASE = '/tmp/mtu_acm.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.from_envvar('MINITWIT_SETTINGS', silent=True)
+app.config.from_envvar('MTU_ACM_SETTINGS', silent=True)
 
 def get_db():
     """Opens a new database connection if there is none yet for the
