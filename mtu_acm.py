@@ -18,14 +18,14 @@ from flask import Flask, request, session, url_for, redirect, \
 from werkzeug import check_password_hash, generate_password_hash
 
 # configuration
-DATABASE = '/tmp/minitwit.db'
+DATABASE = '/tmp/mtu_acm.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.from_envvar('MINITWIT_SETTINGS', silent=True)
+app.config.from_envvar('MTU_ACM_SETTINGS', silent=True)
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -173,6 +173,7 @@ def team_register():
 	if not request.form['name']:
 	    if not request.form['select_name']:
 		error = 'You have to enter a valid team name'
+		return render_template('team_register.html', error=error, teams=teams)
 	    else:
 		name = request.form['select_name']
 	else:
@@ -190,7 +191,6 @@ def team_register():
 		db.commit()
 		flash_string = 'created'
 		team_id = get_team_id(name) # gotta get team id so we can build url
-		return redirect(url_for('team_profile', team_id=team_id))
 
 	current_members = query_db('''select * from user where team_id = ?''', [team_id])
 
