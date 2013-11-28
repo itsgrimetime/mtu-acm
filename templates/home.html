@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}
+  TechHacks Updates
+{% endblock %}
+{% block body %}
+<h2>{{ self.title() }}</h2>
+  <p> Registered Users: {{ user_count }} </p>
+  <p> Registered Teams: {{ team_count }} </p>
+{% endblock %}

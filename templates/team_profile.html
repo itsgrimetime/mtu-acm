@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}
+    {{ team }}
+{% endblock %}
+{% block body %}
+<h2>{{ self.title() }}</h2>
+    {% if g.user %}
+	{% if request.endpoint == 'profile' %}
+	  <div class=followstatus>
+	  </div>
+	{% endif %}
+  {% endif %}
+{% endblock %}

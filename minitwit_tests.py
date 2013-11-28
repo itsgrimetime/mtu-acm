@@ -29,30 +29,29 @@ class MiniTwitTestCase(unittest.TestCase):
 
     # helper functions
 
-    def register(self, username, password, password2=None, email=None):
+    def register(self, name, email, password, password2=None):
         """Helper function to register a user"""
         if password2 is None:
             password2 = password
-        if email is None:
-            email = username + '@example.com'
         return self.app.post('/register', data={
-            'username':     username,
+            'name':	    name,
             'password':     password,
             'password2':    password2,
             'email':        email,
         }, follow_redirects=True)
 
-    def login(self, username, password):
+    def login(self, email, password):
         """Helper function to login"""
         return self.app.post('/login', data={
-            'username': username,
+            'email': email,
             'password': password
         }, follow_redirects=True)
 
-    def register_and_login(self, username, password):
+    def register_and_login(self, email, password):
         """Registers and logs in in one go"""
-        self.register(username, password)
-        return self.login(username, password)
+	self.register('test', email, password)
+	self.logout()
+        return self.login(email, password)
 
     def logout(self):
         """Helper function to logout"""
@@ -66,84 +65,50 @@ class MiniTwitTestCase(unittest.TestCase):
             assert b'Your message was recorded' in rv.data
         return rv
 
+    def create_team(self, team_name):
+	"""Creates a team"""
+	return self.app.post('/team_register', data = {
+	    'name' : team_name
+	}, follow_redirects = True)
+
     # testing functions
 
     def test_register(self):
         """Make sure registering works"""
-        rv = self.register('user1', 'default')
+        rv = self.register('user1', 'user@mtu.edu', 'default')
         assert b'You were successfully registered ' \
                b'and can login now' in rv.data
-        rv = self.register('user1', 'default')
-        assert b'The username is already taken' in rv.data
-        rv = self.register('', 'default')
-        assert b'You have to enter a username' in rv.data
-        rv = self.register('meh', '')
+        rv = self.register('user1', 'user@mtu.edu', 'default')
+        assert b'The email is already registered' in rv.data
+        rv = self.register('', 'user@mtu.edu', 'default')
+        assert b'You have to enter a valid name' in rv.data
+        rv = self.register('meh', 'user@mtu.edu', '')
         assert b'You have to enter a password' in rv.data
-        rv = self.register('meh', 'x', 'y')
+        rv = self.register('meh', 'user@mtu.edu', 'x', 'y')
         assert b'The two passwords do not match' in rv.data
-        rv = self.register('meh', 'foo', email='broken')
+        rv = self.register('meh', 'broken', 'foo')
         assert b'You have to enter a valid email address' in rv.data
 
     def test_login_logout(self):
         """Make sure logging in and logging out works"""
-        rv = self.register_and_login('user1', 'default')
+        rv = self.register_and_login('user@mtu.edu', 'default')
         assert b'You were logged in' in rv.data
         rv = self.logout()
         assert b'You were logged out' in rv.data
-        rv = self.login('user1', 'wrongpassword')
+        rv = self.login('user@mtu.edu', 'wrongpassword')
         assert b'Invalid password' in rv.data
-        rv = self.login('user2', 'wrongpassword')
-        assert b'Invalid username' in rv.data
+        rv = self.login('user2@mtu.edu', 'wrongpassword')
+        assert b'Invalid email' in rv.data
 
-    def test_message_recording(self):
-        """Check if adding messages works"""
-        self.register_and_login('foo', 'default')
-        self.add_message('test message 1')
-        self.add_message('<test message 2>')
-        rv = self.app.get('/')
-        assert b'test message 1' in rv.data
-        assert b'&lt;test message 2&gt;' in rv.data
-
-    def test_timelines(self):
-        """Make sure that timelines work"""
-        self.register_and_login('foo', 'default')
-        self.add_message('the message by foo')
-        self.logout()
-        self.register_and_login('bar', 'default')
-        self.add_message('the message by bar')
-        rv = self.app.get('/public')
-        assert b'the message by foo' in rv.data
-        assert b'the message by bar' in rv.data
-
-        # bar's timeline should just show bar's message
-        rv = self.app.get('/')
-        assert b'the message by foo' not in rv.data
-        assert b'the message by bar' in rv.data
-
-        # now let's follow foo
-        rv = self.app.get('/foo/follow', follow_redirects=True)
-        assert b'You are now following &#34;foo&#34;' in rv.data
-
-        # we should now see foo's message
-        rv = self.app.get('/')
-        assert b'the message by foo' in rv.data
-        assert b'the message by bar' in rv.data
-
-        # but on the user's page we only want the user's message
-        rv = self.app.get('/bar')
-        assert b'the message by foo' not in rv.data
-        assert b'the message by bar' in rv.data
-        rv = self.app.get('/foo')
-        assert b'the message by foo' in rv.data
-        assert b'the message by bar' not in rv.data
-
-        # now unfollow and check if that worked
-        rv = self.app.get('/foo/unfollow', follow_redirects=True)
-        assert b'You are no longer following &#34;foo&#34;' in rv.data
-        rv = self.app.get('/')
-        assert b'the message by foo' not in rv.data
-        assert b'the message by bar' in rv.data
-
+    def test_team_create(self):
+	"""Make sure team creation works"""
+	self.register_and_login('user@mtu.edu', 'default')
+	rv = self.create_team("test team")
+	assert b'You successfully registered test team!' in rv.data
+	rv = self.create_team("test team")
+	assert b'That team name is already taken' in rv.data
+	rv = self.create_team("")
+	assert b' You have to enter a valid team name' in rv.data
 
 if __name__ == '__main__':
     unittest.main()

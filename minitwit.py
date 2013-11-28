@@ -17,10 +17,8 @@ from flask import Flask, request, session, url_for, redirect, \
      render_template, abort, g, flash, _app_ctx_stack
 from werkzeug import check_password_hash, generate_password_hash
 
-
 # configuration
 DATABASE = '/tmp/minitwit.db'
-PER_PAGE = 30
 DEBUG = True
 SECRET_KEY = 'development key'
 
@@ -28,7 +26,6 @@ SECRET_KEY = 'development key'
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('MINITWIT_SETTINGS', silent=True)
-
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -40,14 +37,12 @@ def get_db():
         top.sqlite_db.row_factory = sqlite3.Row
     return top.sqlite_db
 
-
 @app.teardown_appcontext
 def close_database(exception):
     """Closes the database again at the end of the request."""
     top = _app_ctx_stack.top
     if hasattr(top, 'sqlite_db'):
         top.sqlite_db.close()
-
 
 def init_db():
     """Creates the database tables."""
@@ -56,7 +51,6 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-
 
 def query_db(query, args=(), one=False):
     """Queries the database and returns a list of dictionaries."""
@@ -80,12 +74,10 @@ def format_datetime(timestamp):
     """Format a timestamp for display."""
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d @ %H:%M')
 
-
 def gravatar_url(email, size=80):
     """Return the gravatar image for the given email address."""
     return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
         (md5(email.strip().lower().encode('utf-8')).hexdigest(), size)
-
 
 @app.before_request
 def before_request():
@@ -94,23 +86,12 @@ def before_request():
         g.user = query_db('select * from user where user_id = ?',
                           [session['user_id']], one=True)
 
-@app.route('/public')
-def public_timeline():
-    """Displays the latest updates from all teams."""
+@app.route('/')
+def home():
+    """Displays the latest counts from all teams and users."""
     user_count = len(query_db("select * from user"))
     team_count = len(query_db("select * from team"))
-    return render_template('profile.html', user_count=user_count, team_count=team_count)
-
-@app.route('/')
-def profile():
-    """Shows a users profile page or if no user is logged in it will
-    redirect to the public main page.  This timeline shows the user's
-    team info.
-    """
-    if not g.user:
-        return redirect(url_for('public_timeline'))
-    return render_template('profile.html', user=g.user, team=query_db('''
-	select * from team where team_id= ?''', [g.user['team_id']], one=True))
+    return render_template('home.html', user_count=user_count, team_count=team_count)
 
 @app.route('/user/<user_id>')
 def user_profile(user_id):
@@ -149,7 +130,7 @@ def add_message():
 def login():
     """Logs the user in."""
     if g.user:
-        return redirect(url_for('profile'))
+        return redirect(url_for('user_profile', user_id=g.user.id))
     error = None
     if request.method == 'POST':
         user = query_db('''select * from user where
@@ -176,7 +157,7 @@ def team_register():
 	if not request.form['name']:
 	    error = 'You have to enter a valid team name'
 	elif get_team_id(request.form['name']) is not None:
-	    error = 'The username is already taken'
+	    error = 'That team name is already taken'
 	else:
 	    db = get_db()
 	    db.execute('''insert into team (name) values (?)''', [request.form['name']])
@@ -208,7 +189,7 @@ def register():
         elif request.form['password'] != request.form['password2']:
             error = 'The two passwords do not match'
         elif get_user_id(request.form['email']) is not None:
-            error = 'The username is already taken'
+            error = 'The email is already registered'
         else:
             db = get_db()
             db.execute('''insert into user (

@@ -1,12 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}
-  {% if request.endpoint == 'public_timeline' %}
-  TechHacks Updates
-  {% elif request.endpoint == 'profile' %}
-    {{ g.user.name }}'s Profile
-  {% else %}
-    My Profile
-  {% endif %}
+
+    Your Profile
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
@@ -18,11 +13,11 @@
     {% if request.endpoint == 'profile' %}
       <div class=followstatus>
 	{% if g.user.team_id != None %}
-	    View your team here.
-	    {% else %}
+	    View your team <a href="{{ url_for('team_profile') }}">here</a>.
+	{% else %}
 	    You are not yet registered on a team!
 	    Register <a href="{{ url_for('team_register') }}">here</a>.
-	    {% endif %}
+	{% endif %}
       </div>
     {% endif %}
   {% endif %}

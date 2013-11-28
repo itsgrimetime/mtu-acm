@@ -4,12 +4,14 @@
 <div class=page>
   <h1>TechHacks</h1>
   <div class=navigation>
-  {% if g.user %}
-    <a href="{{ url_for('public_timeline') }}">public timeline</a> |
-    <a href="{{ url_for('profile') }}">my profile</a> |
+    <a href="{{ url_for('home') }}">home</a> |
+    {% if g.user %}
+      <a href="{{ url_for('user_profile', user_id=g.user.id) }}">my profile</a> |
+    {% if g.user.team_id %}
+      <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">my team</a> |
+    {% endif %}
     <a href="{{ url_for('logout') }}">sign out [{{ g.user.email }}]</a>
   {% else %}
-    <a href="{{ url_for('public_timeline') }}">public timeline</a> |
     <a href="{{ url_for('register') }}">sign up</a> |
     <a href="{{ url_for('login') }}">sign in</a>
   {% endif %}
