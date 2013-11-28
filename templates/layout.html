@@ -6,7 +6,7 @@
   <div class=navigation>
     <a href="{{ url_for('home') }}">home</a> |
     {% if g.user %}
-      <a href="{{ url_for('user_profile', user_id=g.user.id) }}">my profile</a> |
+      <a href="{{ url_for('user_profile', user_id=g.user.user_id) }}">my profile</a> |
     {% if g.user.team_id %}
       <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">my team</a> |
     {% endif %}

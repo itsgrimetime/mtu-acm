@@ -93,7 +93,7 @@ def home():
     team_count = len(query_db("select * from team"))
     return render_template('home.html', user_count=user_count, team_count=team_count)
 
-@app.route('/user/<user_id>')
+@app.route('/user/<int:user_id>')
 def user_profile(user_id):
     """Display's a users profile"""
     profile_user = query_db('select * from user where user_id = ?',
@@ -102,8 +102,10 @@ def user_profile(user_id):
         abort(404)
     if g.user:
         return render_template('profile.html', profile_user=profile_user)
+    else:
+	return redirect(url_for('home'))
 
-@app.route('/team/<team_id>')
+@app.route('/team/<int:team_id>')
 def team_profile(team_id):
     """Display's a teams profile page."""
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
@@ -111,6 +113,8 @@ def team_profile(team_id):
 	abort(404)
     if g.user:
 	return render_template('team_profile.html', team=team)
+    else:
+	return redirect(url_for('home'))
 
 @app.route('/add_message', methods=['POST'])
 def add_message():
@@ -143,7 +147,7 @@ def login():
         else:
             flash('You were logged in')
             session['user_id'] = user['user_id']
-            return redirect(url_for('profile'))
+	    return redirect(url_for('user_profile', user_id=session['user_id']))
     return render_template('login.html', error=error)
 
 @app.route('/team_register', methods=['GET', 'POST'])
@@ -197,8 +201,11 @@ def register():
               [request.form['name'], request.form['email'],
                generate_password_hash(request.form['password'])])
             db.commit()
-            flash('You were successfully registered and can login now')
-            return redirect(url_for('login'))
+            flash('You were successfully registered and are now logged in')
+	    user = query_db('''select * from user where email = ?
+		    ''', [request.form['email']], one=True)
+            session['user_id'] = user['user_id']
+            return redirect(url_for('home'))
     return render_template('register.html', error=error)
 
 @app.route('/logout')
@@ -206,11 +213,18 @@ def logout():
     """Logs the user out."""
     flash('You were logged out')
     session.pop('user_id', None)
-    return redirect(url_for('public_timeline'))
+    return redirect(url_for('home'))
+
+def possess(name):
+    if name[-1] == 's':
+	return ''.join([name, '\''])
+    else:
+	return ''.join([name, '\'s'])
 
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
+app.jinja_env.filters['possess'] = possess
 
 if __name__ == '__main__':
     init_db()

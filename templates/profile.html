@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block title %}
-
-    Your Profile
+    {% if g.user.user_id == profile_user.user_id %}
+	Your Profile
+    {% else %}
+	{{ profile_user.name|possess }} Profile
+    {% endif %}
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
