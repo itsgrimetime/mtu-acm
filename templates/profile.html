@@ -8,20 +8,14 @@
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
-  {% if request.endpoint == 'public_timeline' %}
-      <p> Registered Users: {{ user_count }} </p>
-      <p> Registered Teams: {{ team_count }} </p>
-  {% endif %}
-  {% if g.user %}
-    {% if request.endpoint == 'profile' %}
+ {% if g.user %}
       <div class=followstatus>
 	{% if g.user.team_id != None %}
-	    View your team <a href="{{ url_for('team_profile') }}">here</a>.
+	    View your team <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">here</a>.
 	{% else %}
 	    You are not yet registered on a team!
 	    Register <a href="{{ url_for('team_register') }}">here</a>.
 	{% endif %}
       </div>
-    {% endif %}
   {% endif %}
 {% endblock %}

@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    TechHacks Registration
+    MiniTwit
     ~~~~~~~~
 
-    A simple registration application written with Flask and sqlite3.
-
-    Written by: Mike Grimes
-
-    Modified from Armin Ronacher's "MiniTwit" Flask example application
-    which is:
+    A microblogging application written with Flask and sqlite3.
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
@@ -23,14 +18,14 @@ from flask import Flask, request, session, url_for, redirect, \
 from werkzeug import check_password_hash, generate_password_hash
 
 # configuration
-DATABASE = '/tmp/mtu_acm.db'
+DATABASE = '/tmp/minitwit.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.from_envvar('MTU_ACM_SETTINGS', silent=True)
+app.config.from_envvar('MINITWIT_SETTINGS', silent=True)
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -114,10 +109,13 @@ def user_profile(user_id):
 def team_profile(team_id):
     """Display's a teams profile page."""
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
+    members = query_db('select * from user where team_id = ?', [team_id])
+    for member in members:
+	print member['name']
     if team is None:
 	abort(404)
     if g.user:
-	return render_template('team_profile.html', team=team)
+	return render_template('team_profile.html', team=team, members=members)
     else:
 	return redirect(url_for('home'))
 
@@ -159,26 +157,55 @@ def login():
 def team_register():
     """Registers the team."""
     error = None
+
+    teams = query_db('select * from team')
+
+    if g.user['team_id'] is not None:
+	flash("You are already signed up for a team!")
+	return redirect(url_for('team_profile', team_id=g.user['team_id']))
+
     if not g.user:
 	flash('You need to be logged in to do that!')
 	return redirect(url_for('login'))
     if request.method == 'POST':
+
+	create_team = False
 	if not request.form['name']:
-	    error = 'You have to enter a valid team name'
-	elif get_team_id(request.form['name']) is not None:
-	    error = 'That team name is already taken'
+	    if not request.form['select_name']:
+		error = 'You have to enter a valid team name'
+	    else:
+		name = request.form['select_name']
 	else:
-	    db = get_db()
-	    db.execute('''insert into team (name) values (?)''', [request.form['name']])
+	    create_team = True
+	    name = request.form['name']
+
+	db = get_db()
+	flash_string = 'joined'
+	team_id = get_team_id(name)
+	if create_team:
+	    if team_id is not None:
+		error = 'That team name is already taken'
+	    else:
+		db.execute('''insert into team (name) values (?)''', [name])
+		db.commit()
+		flash_string = 'created'
+		team_id = get_team_id(name) # gotta get team id so we can build url
+		return redirect(url_for('team_profile', team_id=team_id))
+
+	current_members = query_db('''select * from user where team_id = ?''', [team_id])
+
+	if len(current_members) > 4:
+	    error = '''{team_name} is currently full, please choose another team
+		or create a new one.'''.format(team_name=name)
+	    return render_template('team_register.html', error=error, teams=teams)
+	else:
+	    db.execute('''update user set team_id = ?
+			    where user_id = ?''', [team_id, g.user['user_id']])
 	    db.commit()
-	    team_id = get_team_id(request.form['name'])
-	    print team_id
-	    print g.user['user_id']
-	    db.execute('''update user set team_id = ? where user_id = ?''', [team_id, g.user['user_id']])
-	    db.commit()
-	    flash("You successfully registered {team_name}!".format(team_name=request.form['name']))
-	    return redirect(url_for('profile'))
-    teams = query_db('select * from team')
+	    flash('''You successfully {flash_string} {team_name}!
+		    '''.format(flash_string=flash_string, team_name=name))
+	    return redirect(url_for('team_profile', team_id=team_id))
+
     return render_template('team_register.html', error=error, teams=teams)
 
 @app.route('/register', methods=['GET', 'POST'])

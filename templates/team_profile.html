@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block title %}
-    {{ team }}
+    {{ team.name }}
 {% endblock %}
 {% block body %}
-<h2>{{ self.title() }}</h2>
+    <h2>{{ self.title() }}</h2>
     {% if g.user %}
-	{% if request.endpoint == 'profile' %}
-	  <div class=followstatus>
-	  </div>
+	{% if members %}
+	    <p>Team Members:</p>
+	    {% for member in members %}
+		<p> {{ member.name }} </p>
+	    {% endfor %}
 	{% endif %}
-  {% endif %}
+    {% endif %}
 {% endblock %}

@@ -12,10 +12,10 @@
 	<dt>Or Join an Existing One:</dt>
 
 	<dd>
-	<select>
-	<option name=name value="noteam">Select a Team</option>
-	{% for k, v in teams %}
-	    <option name=name value="{{ request.form.name }}">{{ v }}</option>
+	<select name=select_name>
+	    <option value="">Select a Team</option>
+	    {% for k, v in teams %}
+		<option value="{{ v }}">{{ v }}</option>
 	    {% endfor %}
 	</select>
 	</dd>
