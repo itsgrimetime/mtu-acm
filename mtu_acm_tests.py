@@ -1,15 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-    MiniTwit Tests
+    TechHacks Registration Tests
     ~~~~~~~~~~~~~~
 
-    Tests the MiniTwit application.
+    Modified by: Mike Grimes
+
+    Tests the TechHacks Registration application.
+
+    modified from the "MiniTwit" Flask example app
+    which can be found at:
+
+    (https://github.com/mitsuhiko/flask/examples/minitwit)
+
+    and was written by:
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
 import os
-import minitwit
+import mtu_acm
 import unittest
 import tempfile
 
