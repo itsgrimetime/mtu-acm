@@ -98,10 +98,18 @@ def user_profile(user_id):
     """Display's a users profile"""
     profile_user = query_db('select * from user where user_id = ?',
                             [user_id], one=True)
+
+    if profile_user['team_id'] != None:
+	profile_user_team = query_db('select * from team where team_id = ?',
+		[profile_user['team_id']], one=True)
+    else:
+	profile_user_team = None
+
     if profile_user is None:
         abort(404)
     if g.user:
-        return render_template('profile.html', profile_user=profile_user)
+        return render_template('profile.html', profile_user=profile_user,
+		profile_user_team=profile_user_team)
     else:
 	return redirect(url_for('home'))
 
@@ -110,8 +118,6 @@ def team_profile(team_id):
     """Display's a teams profile page."""
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     members = query_db('select * from user where team_id = ?', [team_id])
-    for member in members:
-	print member['name']
     if team is None:
 	abort(404)
     if g.user:
@@ -159,6 +165,7 @@ def team_register():
     error = None
 
     teams = query_db('select * from team')
+    join_team = len(teams) > 0
 
     if g.user['team_id'] is not None:
 	flash("You are already signed up for a team!")
@@ -167,8 +174,9 @@ def team_register():
     if not g.user:
 	flash('You need to be logged in to do that!')
 	return redirect(url_for('login'))
-    if request.method == 'POST':
 
+    if request.method == 'POST':
+	hardware = 0
 	create_team = False
 	if not request.form['name']:
 	    if not request.form['select_name']:
@@ -178,6 +186,8 @@ def team_register():
 		name = request.form['select_name']
 	else:
 	    create_team = True
+	    if 'hardware' in request.form:
+		hardware = 1
 	    name = request.form['name']
 
 	db = get_db()
@@ -187,7 +197,8 @@ def team_register():
 	    if team_id is not None:
 		error = 'That team name is already taken'
 	    else:
-		db.execute('''insert into team (name) values (?)''', [name])
+		db.execute('''insert into team (name, admin_id, hardware) values
+			(?, ?, ?)''', [name, g.user['user_id'], hardware])
 		db.commit()
 		flash_string = 'created'
 		team_id = get_team_id(name) # gotta get team id so we can build url
@@ -206,7 +217,7 @@ def team_register():
 		    '''.format(flash_string=flash_string, team_name=name))
 	    return redirect(url_for('team_profile', team_id=team_id))
 
-    return render_template('team_register.html', error=error, teams=teams)
+    return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

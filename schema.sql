@@ -11,5 +11,7 @@ create table if not exists user (
 -- drop table if exists team;
 create table if not exists team (
     team_id integer primary key autoincrement,
-    name text not null
+    name text not null,
+    admin_id integer,
+    hardware integer
 );

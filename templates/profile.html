@@ -8,14 +8,20 @@
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
- {% if g.user %}
+ {% if g.user.user_id == profile_user.user_id %}
       <div class=followstatus>
 	{% if g.user.team_id != None %}
-	    View your team <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">here</a>.
+	You are on
+	<a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">{{ profile_user_team.name }}</a>.
 	{% else %}
 	    You are not yet registered on a team!
 	    Register <a href="{{ url_for('team_register') }}">here</a>.
 	{% endif %}
       </div>
-  {% endif %}
+      {% else %}
+	{% if profile_user_team %}
+	{{ profile_user.name }} is on
+	<a href="{{ url_for('team_profile', team_id=profile_user_team.team_id) }}">{{ profile_user_team.name }}</a>
+	{% endif %}
+      {% endif %}
 {% endblock %}

@@ -1,25 +1,37 @@
 {% extends "layout.html" %}
 {% block title %}Sign Up{% endblock %}
 {% block body %}
-  <h2>Sign Up</h2>
-  {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
-  <form action="" method=post>
-    Create a New Team:
+<h2>Sign Up</h2>
+
+{% if error %}
+<div class=error>
+    <strong>Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+<form action="" method=post>
+    <h3>Create a New Team:</h3>
     <dl>
-
-	<dt>Team Name:</dt>
-	<dd><input type=text name=name size=30 value="{{ request.form.name }}"></dd>
-	<dt>Or Join an Existing One:</dt>
-
+	<dt>
+	Team Name:
+	<input type=text name=name size=30 value="{{ request.form.name }}">
+	</dd>
+	<dt>
+	This team is doing a hardware hack
+	<input type=checkbox name=hardware value="1">
+	</dd><br>
+	{% if join_team %}
+	<h3>Or Join an Existing One:</h3>
 	<dd>
 	<select name=select_name>
 	    <option value="">Select a Team</option>
-	    {% for k, v in teams %}
-		<option value="{{ v }}">{{ v }}</option>
+	    {% for team in teams %}
+	    <option value="{{ team.name }}">{{ team.name }}</option>
 	    {% endfor %}
 	</select>
 	</dd>
+	{% endif %}
     </dl>
     <div class=actions><input type=submit value="Sign Up"></div>
-  </form>
+</form>
 {% endblock %}

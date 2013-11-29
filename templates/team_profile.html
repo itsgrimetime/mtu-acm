@@ -1,15 +1,25 @@
 {% extends "layout.html" %}
 {% block title %}
-    {{ team.name }}
+{{ team.name }} {% if team.hardware %} (Hardware) {% endif %}
 {% endblock %}
 {% block body %}
-    <h2>{{ self.title() }}</h2>
-    {% if g.user %}
-	{% if members %}
-	    <p>Team Members:</p>
-	    {% for member in members %}
-		<p> {{ member.name }} </p>
-	    {% endfor %}
-	{% endif %}
-    {% endif %}
+<h2>{{ self.title() }}</h2>
+{% if g.user %}
+{% if members %}
+<p>Team Members:</p>
+{% for member in members %}
+<p> {{ member.name }} {% if team.admin_id == member.user_id %} (Admin) {% endif %}</p>
+{% endfor %}
+{% endif %}
+{% if team.admin == g.user.user_id %}
+<form action="" method=post>
+    Edit Team:
+    <dl>
+	<dt>Team Name:</dt>
+	<dd><input type=text name=name size=30 value"{{ request.form.name }}"></dd>
+    </dl>
+    <div class=actions><input type=submit value="Apply"></div>
+</form>
+{% endif %}
+{% endif %}
 {% endblock %}
