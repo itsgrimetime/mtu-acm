@@ -113,11 +113,28 @@ def user_profile(user_id):
     else:
 	return redirect(url_for('home'))
 
-@app.route('/team/<int:team_id>')
+@app.route('/team/<int:team_id>/delete', methods=['GET'])
+def team_delete(team_id):
+    team = query_db('select * from team where team_id = ?', [team_id], one=True)
+
+    if g.user['user_id'] == team['admin_id']:
+	db = get_db()
+	db.execute('delete from team where team_id = ?', [team_id])
+	db.execute('update user set team_id = ? where team_id = ?', [None, team_id])
+	db.commit()
+	flash("{team_name} has been deleted.".format(team_name=team['name']))
+	return redirect(url_for('user_profile', user_id=g.user['user_id']))
+    else:
+	error = "You are not the administrator of this team."
+	return render_template('team_profile', team_id=team_id, error=error)
+
+
+@app.route('/team/<int:team_id>', methods=['GET'])
 def team_profile(team_id):
     """Display's a teams profile page."""
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     members = query_db('select * from user where team_id = ?', [team_id])
+
     if team is None:
 	abort(404)
     if g.user:
@@ -176,12 +193,16 @@ def team_register():
 	return redirect(url_for('login'))
 
     if request.method == 'POST':
+
+	print request.form
+
 	hardware = 0
 	create_team = False
 	if not request.form['name']:
 	    if not request.form['select_name']:
 		error = 'You have to enter a valid team name'
-		return render_template('team_register.html', error=error, teams=teams)
+		print teams
+		return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
 	    else:
 		name = request.form['select_name']
 	else:

@@ -5,7 +5,7 @@ body {
 }
 
 a {
-    color: #26776F;
+    color: #775A26;
 }
 
 a:hover {
@@ -15,7 +15,7 @@ a:hover {
 input[type="text"],
 input[type="password"] {
     background: white;
-    border: 1px solid #BFE6E2;
+    border: 1px solid #ED9728;
     padding: 2px;
     font-family: 'Trebuchet MS', sans-serif;
     font-size: 14px;
@@ -54,7 +54,7 @@ div.page h1 {
 }
 
 div.page div.navigation {
-    background: #DEE9E8;
+    background: #EBEBEB;
     padding: 4px 10px;
     border-top: 1px solid #ccc;
     border-bottom: 1px solid #eee;
@@ -87,7 +87,7 @@ div.page div.footer {
 
 div.page div.followstatus {
     border: 1px solid #ccc;
-    background: #E3EBEA;
+    background: #E9E4E0;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
     padding: 3px;

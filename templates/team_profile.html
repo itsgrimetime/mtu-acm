@@ -6,10 +6,15 @@
 <h2>{{ self.title() }}</h2>
 {% if g.user %}
 {% if members %}
-<p>Team Members:</p>
-{% for member in members %}
-<p> {{ member.name }} {% if team.admin_id == member.user_id %} (Admin) {% endif %}</p>
-{% endfor %}
+<h3>Team Members:</h3>
+<ul>
+    {% for member in members %}
+    <li>
+    <a href={{ url_for('user_profile', user_id=member.user_id) }}>{{ member.name }}</a>
+    {% if team.admin_id == member.user_id %} (Captain) {% endif %}
+    </li>
+    {% endfor %}
+</ul>
 {% endif %}
 {% if team.admin == g.user.user_id %}
 <form action="" method=post>
@@ -20,6 +25,9 @@
     </dl>
     <div class=actions><input type=submit value="Apply"></div>
 </form>
+{% endif %}
+{% if g.user.user_id == team.admin_id %}
+<a href={{ url_for('team_delete', team_id=team.team_id) }}>Delete this team</a>
 {% endif %}
 {% endif %}
 {% endblock %}
