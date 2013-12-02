@@ -1,27 +1,45 @@
 {% extends "layout.html" %}
 {% block title %}
-    {% if g.user.user_id == profile_user.user_id %}
-	Your Profile
-    {% else %}
-	{{ profile_user.name|possess }} Profile
-    {% endif %}
+{% if g.user.user_id == profile_user.user_id %}
+Your Profile
+{% else %}
+{{ profile_user.name|possess }} Profile
+{% endif %}
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
- {% if g.user.user_id == profile_user.user_id %}
-      <div class=followstatus>
-	{% if g.user.team_id != None %}
-	You are on
-	<a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">{{ profile_user_team.name }}</a>.
-	{% else %}
-	    You are not yet registered on a team!
-	    Register <a href="{{ url_for('team_register') }}">here</a>.
-	{% endif %}
-      </div>
-      {% else %}
-	{% if profile_user_team %}
-	{{ profile_user.name }} is on
-	<a href="{{ url_for('team_profile', team_id=profile_user_team.team_id) }}">{{ profile_user_team.name }}</a>
-	{% endif %}
-      {% endif %}
+{% if g.user.user_id == profile_user.user_id %}
+<div class=followstatus>
+    {% if g.user.team_id != None %}
+    You are on
+    <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">{{ profile_user_team.name }}</a>.
+    {% else %}
+    You are not yet registered on a team!
+    Register <a href="{{ url_for('team_register') }}">here</a>.
+    {% endif %}
+</div>
+{% if shirt_size %}
+<p>Your selected shirt size is: {{ shirt_size }}</p>
+{% else %}
+<p>You haven't selected a shirt size yet!</p>
+{% endif %}
+<form action="" method=post>
+    <dt>Shirt Size:
+    <dl>
+	<input type=radio name=shirtsize value="S">Small
+	<input type=radio name=shirtsize value="M">Medium
+	<input type=radio name=shirtsize value="L">Large
+	<input type=radio name=shirtsize value="XL">Extra Large
+	<input type=radio name=shirtsize value="2XL">2X Large
+    </dl>
+    </dt>
+    <div class=actions><input type=submit value="Apply Changes"></div>
+</form>
+{% else %}
+{% if profile_user_team %}
+{{ profile_user.name }} is on
+<a href="{{ url_for('team_profile', team_id=profile_user_team.team_id) }}">{{ profile_user_team.name }}</a>
+{% endif %}
+{% endif %}
+
 {% endblock %}

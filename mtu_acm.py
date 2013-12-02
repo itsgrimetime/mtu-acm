@@ -93,25 +93,38 @@ def home():
     team_count = len(query_db("select * from team"))
     return render_template('home.html', user_count=user_count, team_count=team_count)
 
-@app.route('/user/<int:user_id>')
+@app.route('/user/<int:user_id>', methods=['GET', 'POST'])
 def user_profile(user_id):
     """Display's a users profile"""
     profile_user = query_db('select * from user where user_id = ?',
                             [user_id], one=True)
 
-    if profile_user['team_id'] != None:
-	profile_user_team = query_db('select * from team where team_id = ?',
-		[profile_user['team_id']], one=True)
-    else:
-	profile_user_team = None
+    if request.method == 'POST' and profile_user['user_id'] == g.user['user_id']:
+	if 'shirtsize' in request.form:
+	    db = get_db()
+	    db.execute('''update user set shirt_size = ? where user_id = ?
+		''', [request.form['shirtsize'], g.user['user_id']])
+	    db.commit()
+	return redirect(url_for('user_profile', user_id = g.user['user_id']))
 
-    if profile_user is None:
-        abort(404)
-    if g.user:
-        return render_template('profile.html', profile_user=profile_user,
-		profile_user_team=profile_user_team)
     else:
-	return redirect(url_for('home'))
+
+	if profile_user['team_id'] != None:
+	    profile_user_team = query_db('select * from team where team_id = ?',
+		    [profile_user['team_id']], one=True)
+	else:
+	    profile_user_team = None
+
+	if profile_user is None:
+	    abort(404)
+	if g.user:
+	    # this is messy, I don't like always giving the template the shirt size
+	    # but I guess we can always just check to see if g.user == profile_user and
+	    # only display it if true
+	    return render_template('profile.html', profile_user=profile_user,
+		    profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
+	else:
+	    return redirect(url_for('home'))
 
 @app.route('/team/<int:team_id>/delete', methods=['GET'])
 def team_delete(team_id):
@@ -194,8 +207,6 @@ def team_register():
 
     if request.method == 'POST':
 
-	print request.form
-
 	hardware = 0
 	create_team = False
 	if not request.form['name']:
@@ -248,7 +259,11 @@ def all_users():
 @app.route('/teams', methods=['GET'])
 def all_teams():
     teams = query_db('select * from team')
-    return render_template('teams.html', teams=teams)
+    team_data = {}
+    for team in teams:
+	team_data[team] = len(query_db('''
+	    select * from team where team_id = ?''', [team['team_id']]))
+    return render_template('teams.html', teams=teams, team_data=team_data)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -271,8 +286,8 @@ def register():
         else:
             db = get_db()
             db.execute('''insert into user (
-              name, email, pw_hash) values (?, ?, ?)''',
-              [request.form['name'], request.form['email'],
+              name, email, shirt_size, pw_hash) values (?, ?, ?, ?)''',
+              [request.form['name'], request.form['email'], request.form['shirtsize'],
                generate_password_hash(request.form['password'])])
             db.commit()
             flash('You were successfully registered and are now logged in')

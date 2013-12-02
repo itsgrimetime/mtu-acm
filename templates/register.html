@@ -1,19 +1,28 @@
 {% extends "layout.html" %}
 {% block title %}Sign Up{% endblock %}
 {% block body %}
-  <h2>Sign Up</h2>
-  {% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
-  <form action="" method=post>
+<h2>Sign Up</h2>
+{% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
+<form action="" method=post>
     <dl>
-      <dt>Name:
-      <dd><input type=text name=name size=30 value="{{ request.form.name }}">
-      <dt>E-Mail:
-      <dd><input type=text name=email size=30 value="{{ request.form.email }}">
-      <dt>Password:
-      <dd><input type=password name=password size=30>
-      <dt>Password <small>(repeat)</small>:
-      <dd><input type=password name=password2 size=30>
+	<dt>Name:</dt>
+	<dd><input type=text name=name size=30 value="{{ request.form.name }}"></dd>
+	<dt>E-Mail:</dt>
+	<dd><input type=text name=email size=30 value="{{ request.form.email }}"></dd>
+	<dt>Password:</dt>
+	<dd><input type=password name=password size=30></dd>
+	<dt>Password <small>(repeat)</small>:</dt>
+	<dd><input type=password name=password2 size=30></dd>
+	<dt>Shirt Size:
+	<dl>
+	    <input type=radio name=shirtsize value="S">Small
+	    <input type=radio name=shirtsize value="M">Medium
+	    <input type=radio name=shirtsize value="L">Large
+	    <input type=radio name=shirtsize value="XL">Extra Large
+	    <input type=radio name=shirtsize value="2XL">2X Large
+	</dl>
+	</dt>
     </dl>
     <div class=actions><input type=submit value="Sign Up"></div>
-  </form>
+</form>
 {% endblock %}
