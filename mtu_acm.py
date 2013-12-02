@@ -283,6 +283,8 @@ def register():
             error = 'The two passwords do not match'
         elif get_user_id(request.form['email']) is not None:
             error = 'The email is already registered'
+	elif 'shirtsize' not in request.form:
+	    error = 'You need to pick a t-shirt size!'
         else:
             db = get_db()
             db.execute('''insert into user (
