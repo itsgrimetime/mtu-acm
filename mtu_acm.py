@@ -240,6 +240,16 @@ def team_register():
 
     return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
 
+@app.route('/users', methods=['GET'])
+def all_users():
+    users = query_db('select * from user')
+    return render_template('users.html', users=users)
+
+@app.route('/teams', methods=['GET'])
+def all_teams():
+    teams = query_db('select * from team')
+    return render_template('teams.html', teams=teams)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Registers the user."""

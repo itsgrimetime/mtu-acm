@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}
+All Teams
+{% endblock %}
+{% block body %}
+<h2>{{ self.title() }}</h2>
+{% if teams %}
+<ul>
+    {% for team in teams %}
+    <li>
+    <a href={{ url_for('team_profile', team_id=team.team_id) }}>{{ team.name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
