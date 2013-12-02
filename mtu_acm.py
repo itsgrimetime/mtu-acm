@@ -256,7 +256,7 @@ def all_teams():
     team_data = {}
     for team in teams:
 	team_data[team] = len(query_db('''
-	    select * from team where team_id = ?''', [team['team_id']]))
+	    select * from user where team_id = ?''', [team['team_id']]))
     return render_template('teams.html', teams=teams, team_data=team_data)
 
 @app.route('/register', methods=['GET', 'POST'])
