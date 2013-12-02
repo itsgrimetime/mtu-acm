@@ -117,14 +117,11 @@ def user_profile(user_id):
 
 	if profile_user is None:
 	    abort(404)
-	if g.user:
-	    # this is messy, I don't like always giving the template the shirt size
-	    # but I guess we can always just check to see if g.user == profile_user and
-	    # only display it if true
-	    return render_template('profile.html', profile_user=profile_user,
-		    profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
-	else:
-	    return redirect(url_for('home'))
+	# this is messy, I don't like always giving the template the shirt size
+	# but I guess we can always just check to see if g.user == profile_user and
+	# only display it if true
+	return render_template('profile.html', profile_user=profile_user,
+		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
 
 @app.route('/team/<int:team_id>/delete', methods=['GET'])
 def team_delete(team_id):
@@ -150,10 +147,7 @@ def team_profile(team_id):
 
     if team is None:
 	abort(404)
-    if g.user:
-	return render_template('team_profile.html', team=team, members=members)
-    else:
-	return redirect(url_for('home'))
+    return render_template('team_profile.html', team=team, members=members)
 
 @app.route('/add_message', methods=['POST'])
 def add_message():

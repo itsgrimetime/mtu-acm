@@ -4,7 +4,6 @@
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
-{% if g.user %}
 {% if members %}
 <h3>Team Members:</h3>
 <ul>
@@ -16,6 +15,7 @@
     {% endfor %}
 </ul>
 {% endif %}
+{% if g.user %}
 {% if team.admin == g.user.user_id %}
 <form action="" method=post>
     Edit Team:
