@@ -296,17 +296,25 @@ def team_register():
 
 @app.route('/users', methods=['GET'])
 def all_users():
-    users = query_db('select * from user')
-    return render_template('users.html', users=users)
+    if g.user:
+	users = query_db('select * from user')
+	return render_template('users.html', users=users)
+    else:
+	flash('You need to be logged in to do that')
+	return redirect(url_for('home'))
 
 @app.route('/teams', methods=['GET'])
 def all_teams():
-    teams = query_db('select * from team')
-    team_data = {}
-    for team in teams:
-	team_data[team] = len(query_db('''
-	    select * from user where team_id = ?''', [team['team_id']]))
-    return render_template('teams.html', teams=teams, team_data=team_data)
+    if g.user:
+	teams = query_db('select * from team')
+	team_data = {}
+	for team in teams:
+	    team_data[team] = len(query_db('''
+		select * from user where team_id = ?''', [team['team_id']]))
+	return render_template('teams.html', teams=teams, team_data=team_data)
+    else:
+	flash('You need to be logged in to do that')
+	return redirect(url_for('home'))
 
 @app.route('/faq', methods=['GET'])
 def faq():
