@@ -3,7 +3,11 @@
 {{ team.name }} {% if team.hardware %} (Hardware) {% endif %}
 {% endblock %}
 {% block body %}
+{% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
 <h2>{{ self.title() }}</h2>
+{% if g.user['team_id'] == team.team_id %}
+<a href="{{ url_for('leave_team', team_id=team.team_id) }}">Leave this team</a>
+{% endif %}
 {% if members %}
 <h3>Team Members:</h3>
 <ul>
@@ -16,9 +20,9 @@
 </ul>
 {% endif %}
 {% if g.user %}
-{% if team.admin == g.user.user_id %}
+{% if team.admin_id == g.user.user_id %}
 <form action="" method=post>
-    Edit Team:
+    <h3>Edit Team:</h3>
     <dl>
 	<dt>Team Name:</dt>
 	<dd><input type=text name=name size=30 value"{{ request.form.name }}"></dd>
@@ -27,7 +31,7 @@
 </form>
 {% endif %}
 {% if g.user.user_id == team.admin_id %}
-<a href={{ url_for('team_delete', team_id=team.team_id) }}>Delete this team</a>
+<h3><a href={{ url_for('team_delete', team_id=team.team_id) }}>Delete this team</a></h3>
 {% endif %}
 {% endif %}
 {% endblock %}

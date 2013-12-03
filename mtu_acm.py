@@ -123,6 +123,30 @@ def user_profile(user_id):
 	return render_template('profile.html', profile_user=profile_user,
 		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
 
+@app.route('/team/<int:team_id>/leave', methods=['GET'])
+def leave_team(team_id):
+    team = query_db('select * from team where team_id = ?', [team_id], one=True)
+    if g.user:
+	if g.user['team_id'] == team_id:
+	    db = get_db()
+	    db.execute('update user set team_id = ? where user_id = ?', [None, g.user['user_id']])
+
+	    flash('You have left {team_name}'.format(team_name=team['name']))
+	    if len(query_db('select * from user where team_id = ?', [team_id])) < 1:
+		db.execute('delete from team where team_id = ?', [team_id])
+		db.commit()
+		return redirect(url_for('user_profile', user_id=g.user['user_id']))
+	    db.commit()
+	    return redirect(url_for('team_profile', team_id=team['team_id']))
+	else:
+	    error = "You are not on that team."
+	    members = query_db('select * from user where team_id = ?', [team_id])
+	    return render_template('team_profile.html', team=team, error=error, members=members)
+    else:
+	error = "You are not logged in."
+	members = query_db('select * from user where team_id = ?', [team_id])
+	return render_template('team_profile.html', team=team, error=error, members=members)
+
 @app.route('/team/<int:team_id>/delete', methods=['GET'])
 def team_delete(team_id):
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
@@ -139,15 +163,37 @@ def team_delete(team_id):
 	return render_template('team_profile', team_id=team_id, error=error)
 
 
-@app.route('/team/<int:team_id>', methods=['GET'])
+@app.route('/team/<int:team_id>', methods=['GET', 'POST'])
 def team_profile(team_id):
     """Display's a teams profile page."""
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     members = query_db('select * from user where team_id = ?', [team_id])
 
-    if team is None:
-	abort(404)
-    return render_template('team_profile.html', team=team, members=members)
+    if request.method == 'POST':
+	print "in post"
+	if g.user['user_id'] == team['admin_id']:
+	    print "in thing"
+	    if len(request.form['name']) > 62:
+		error = "Team name must be less than 62 characters."
+	    elif not request.form['name']:
+		error = "Please enter a team name."
+	    else:
+		db = get_db()
+		old_name = team['name']
+		db.execute('''update team set name = ? where team_id = ?
+			''', [request.form['name'], team_id])
+		db.commit()
+		flash('''{old_name} renamed to {new_name}
+			'''.format(old_name=old_name, new_name=request.form['name']))
+		return redirect(url_for('team_profile', team_id=team_id))
+	    return render_template('team_profile.html', team=team, error=error, members=members)
+	else:
+	    error = "You are not the administrator of this team."
+	    return render_template('team_profile.html', team=team, error=error)
+    else:
+	if team is None:
+	    abort(404)
+	return render_template('team_profile.html', team=team, members=members)
 
 @app.route('/add_message', methods=['POST'])
 def add_message():
@@ -192,11 +238,11 @@ def team_register():
     join_team = len(teams) > 0
 
     if g.user['team_id'] is not None:
-	flash("You are already signed up for a team!")
+	flash("You are already signed up for a team.")
 	return redirect(url_for('team_profile', team_id=g.user['team_id']))
 
     if not g.user:
-	flash('You need to be logged in to do that!')
+	flash('You need to be logged in to do that.')
 	return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -215,6 +261,9 @@ def team_register():
 	    if 'hardware' in request.form:
 		hardware = 1
 	    name = request.form['name']
+	    if len(name) > 62:
+		error = 'Team name must be less than 62 characters long'
+		return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
 
 	db = get_db()
 	flash_string = 'joined'
