@@ -328,11 +328,9 @@ def register():
     error = None
     if request.method == 'POST':
 	if not request.form['name']:
+	    print "no name"
 	    error = 'You have to enter a valid name'
-        elif not request.form['email'] or \
-                 '@mtu.edu' not in request.form['email'] or \
-		 '@gmail.com' not in request.form['email'] or \
-		 '@nmu.edu' not in request.form['email']:
+        elif not request.form['email']:
             error = 'You have to enter a valid email address'
         elif not request.form['password']:
             error = 'You have to enter a password'
