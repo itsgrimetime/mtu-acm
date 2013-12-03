@@ -1,9 +1,47 @@
 {% extends "layout.html" %}
 {% block title %}
-  TechHacks Updates
+TechHacks Updates
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
-  <p> Registered Users: {{ user_count }} </p>
-  <p> Registered Teams: {{ team_count }} </p>
+
+<p><strong>Time:</strong> Friday, December 6th at 6pm to Saturday, December 7th at 12pm. A full 18 hours.</p>
+
+<p><strong>Place:</strong> Kickoff will be held in Fisher 135, and Hacking will take place all over Rekhi Hall.</p>
+
+<p><strong>Food:</strong> Yes. Lots of it.</p>
+
+<p><strong>Prizes:</strong> Nexus 7s, Kindle Paperwhites, Chromecasts, TI Launchpads, Hammocks, and more! You get a
+T-shirt, too!</p>
+<center><p>A special thanks to all of our sponsors who made this event possible!</p></center>
+<table>
+    <tr>
+	<td>
+	    <img src="{{ url_for('static', filename='facebook_logo_detail.jpg') }}" alt="Facebook" width=250
+	    height=250>
+	</td>
+	<td>
+	    <img src="{{ url_for('static', filename='fb_logo.png') }}" alt="Michigan Tech Film Board" width=200 height=200>
+	</td>
+	<td>
+	    <img src="{{ url_for('static', filename='irhc_logo.jpg') }}" alt="Inter-Residence Hall Council">
+	</td>
+    </tr>
+
+    <tr>
+	<td></td>
+	<td>
+	    <img src="{{ url_for('static', filename='Family_Video_Logo.jpg') }}" alt="Family Video">
+	</td>
+	<td></td>
+    </tr>
+</table>
+<br>
+<center>
+    <p>Check out the <a href="/faq">FAQ</a> for more information</p>
+</center>
+<center>
+    <p> Registered Users: {{ user_count }} </p>
+    <p> Registered Teams: {{ team_count }} </p>
+</center>
 {% endblock %}

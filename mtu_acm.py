@@ -308,6 +308,10 @@ def all_teams():
 	    select * from user where team_id = ?''', [team['team_id']]))
     return render_template('teams.html', teams=teams, team_data=team_data)
 
+@app.route('/faq', methods=['GET'])
+def faq():
+    return "Coming soon!"
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Registers the user."""
