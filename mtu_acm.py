@@ -318,7 +318,7 @@ def all_teams():
 
 @app.route('/faq', methods=['GET'])
 def faq():
-    return "Coming soon!"
+    return render_template('faq.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
