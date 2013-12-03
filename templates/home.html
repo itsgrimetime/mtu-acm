@@ -13,35 +13,57 @@ TechHacks Updates
 
 <p><strong>Prizes:</strong> Nexus 7s, Kindle Paperwhites, Chromecasts, TI Launchpads, Hammocks, and more! You get a
 T-shirt, too!</p>
+<center>
+    <p>Check out the <a href="/faq">FAQ</a> for more information.</p>
+</center>
 <center><p>A special thanks to all of our sponsors who made this event possible!</p></center>
-<table>
-    <tr>
-	<td>
-	    <img src="{{ url_for('static', filename='facebook_logo_detail.jpg') }}" alt="Facebook" width=250
-	    height=250>
-	</td>
-	<td>
-	    <img src="{{ url_for('static', filename='fb_logo.png') }}" alt="Michigan Tech Film Board" width=200 height=200>
-	</td>
-	<td>
-	    <img src="{{ url_for('static', filename='irhc_logo.jpg') }}" alt="Inter-Residence Hall Council">
-	</td>
-    </tr>
+<center>
+    <table>
+	<tr>
+	    <td>
+		<img src="{{ url_for('static', filename='facebook_logo_detail.jpg') }}" alt="Facebook" width=250
+		height=250>
+	    </td>
+	    <td></td>
+	    <td>
+		<img src="{{ url_for('static', filename='CONTROLTECLogoDark.png') }}" alt="ControlTec" width=420>
+	    </td>
+	</tr>
+    </table>
+</center>
+<center>
+    <table>
+	<tr>
+	    <td>
+		<img src="{{ url_for('static', filename='fb_logo.png') }}" alt="Michigan Tech Film Board" width=200 height=200>
+	    </td>
+	    <td>
+		<img src="{{ url_for('static', filename='irhc_logo.jpg') }}" alt="Inter-Residence Hall Council">
+	    </td>
+	    <td>
+		<img src="{{ url_for('static', filename='Family_Video_Logo.jpg') }}" alt="Family Video">
+	    </td>
+	</tr>
+    </table>
+</center>
+<center>
+    <table>
+	<tr>
+	    <td>
+		<img src="{{ url_for('static', filename='mtu_cs.png') }}" alt="Michigan Technological University
+		Department of Computer Science" width=300>
+	    </td>
+	    <td>&nbsp;&nbsp;&nbsp;</td>
+	    <td>
+		<img src="{{ url_for('static', filename='mtu_eecs.png') }}" alt="Michigan Technological University
+		Department of Electrical and Computer Engineering" width=300>
+	    </td>
 
-    <tr>
-	<td></td>
-	<td>
-	    <img src="{{ url_for('static', filename='Family_Video_Logo.jpg') }}" alt="Family Video">
-	</td>
-	<td></td>
-    </tr>
-</table>
-<br>
-<center>
-    <p>Check out the <a href="/faq">FAQ</a> for more information</p>
-</center>
-<center>
-    <p> Registered Users: {{ user_count }} </p>
-    <p> Registered Teams: {{ team_count }} </p>
-</center>
-{% endblock %}
+	</table>
+    </center>
+    <br>
+    <center>
+	<p> Registered Users: {{ user_count }} </p>
+	<p> Registered Teams: {{ team_count }} </p>
+    </center>
+    {% endblock %}
