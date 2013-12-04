@@ -89,9 +89,7 @@ def before_request():
 @app.route('/')
 def home():
     """Displays the latest counts from all teams and users."""
-    user_count = len(query_db("select * from user"))
-    team_count = len(query_db("select * from team"))
-    return render_template('home.html', user_count=user_count, team_count=team_count)
+    return render_template('home.html')
 
 @app.route('/user/<int:user_id>', methods=['GET', 'POST'])
 def user_profile(user_id):
@@ -367,10 +365,20 @@ def possess(name):
     else:
 	return ''.join([name, '\'s'])
 
+def user_count():
+    print "here"
+    return len(query_db("select * from user"))
+
+def team_count():
+    return len(query_db("select * from team"))
+
+
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
 app.jinja_env.filters['possess'] = possess
+app.jinja_env.globals.update(user_count=user_count)
+app.jinja_env.globals.update(team_count=team_count)
 
 if __name__ == '__main__':
     init_db()
