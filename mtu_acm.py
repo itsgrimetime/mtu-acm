@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    MiniTwit
+    TechHacks Registration
     ~~~~~~~~
 
-    A microblogging application written with Flask and sqlite3.
+    author: Mike Grimes
+
+    modified from MiniTwit example app, which was originally made by:
 
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
@@ -19,7 +21,7 @@ from werkzeug import check_password_hash, generate_password_hash
 
 # configuration
 DATABASE = '/tmp/mtu_acm.db'
-DEBUG = True
+DEBUG = False
 SECRET_KEY = 'development key'
 
 # create our little application :)
@@ -123,27 +125,37 @@ def user_profile(user_id):
 
 @app.route('/team/<int:team_id>/leave', methods=['GET'])
 def leave_team(team_id):
+    print "trying to leave team"
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     if g.user:
 	if g.user['team_id'] == team_id:
+	    print "user is on team"
 	    db = get_db()
 	    db.execute('update user set team_id = ? where user_id = ?', [None, g.user['user_id']])
-
 	    flash('You have left {team_name}'.format(team_name=team['name']))
+
 	    if len(query_db('select * from user where team_id = ?', [team_id])) < 1:
+		print "last team member"
 		db.execute('delete from team where team_id = ?', [team_id])
 		db.commit()
 		return redirect(url_for('user_profile', user_id=g.user['user_id']))
+
+	    if team['admin_id'] == g.user['user_id']:
+		print "setting new admin"
+		new_admin = query_db('select * from user where team_id = ?', [team_id], one=True)
+		db.execute('''update team set admin_id = ? where team_id = ?
+			''', [new_admin['user_id'], team_id])
+
+	    print "doing commit"
 	    db.commit()
-	    return redirect(url_for('team_profile', team_id=team['team_id']))
+	    print "trying to redirect"
+	    return redirect(url_for('team_profile', team_id=team_id))
 	else:
 	    error = "You are not on that team."
-	    members = query_db('select * from user where team_id = ?', [team_id])
-	    return render_template('team_profile.html', team=team, error=error, members=members)
+	    return redirect(url_for('team_profile', team_id=team_id))
     else:
 	error = "You are not logged in."
-	members = query_db('select * from user where team_id = ?', [team_id])
-	return render_template('team_profile.html', team=team, error=error, members=members)
+	return redirect(url_for('team_profile.html', team_id=team_id))
 
 @app.route('/team/<int:team_id>/delete', methods=['GET'])
 def team_delete(team_id):
@@ -351,6 +363,20 @@ def register():
             session['user_id'] = user['user_id']
             return redirect(url_for('home'))
     return render_template('register.html', error=error)
+
+@app.route('/find')
+def find_team():
+    if not g.user:
+	flash('You need to be logged in to do that.')
+	redirect(url_for('home'))
+    elif g.user['team_id']:
+	flash('You are already on a team.')
+	redirect(url_for('home'))
+    else:
+	teams = query_db('select * from team where needs_members = 1')
+	return render_template('find_team.html', teams=teams)
+	# select all teams who are looking for people
+	# pass them to template :)
 
 @app.route('/admin')
 def admin():
