@@ -21,8 +21,10 @@ from werkzeug import check_password_hash, generate_password_hash
 
 # configuration
 DATABASE = '/tmp/mtu_acm.db'
-DEBUG = False
+DEBUG = True
 SECRET_KEY = 'development key'
+
+admin_emails = ["magrimes@mtu.edu"]
 
 # create our little application :)
 app = Flask(__name__)
@@ -108,7 +110,6 @@ def user_profile(user_id):
 	return redirect(url_for('user_profile', user_id = g.user['user_id']))
 
     else:
-
 	if profile_user['team_id'] != None:
 	    profile_user_team = query_db('select * from team where team_id = ?',
 		    [profile_user['team_id']], one=True)
@@ -380,7 +381,7 @@ def find_team():
 
 @app.route('/admin')
 def admin():
-    if g.user['email'] != "magrimes@mtu.edu":
+    if not is_admin(g.user['email']):
 	flash("You are not an administrator.")
 	return render_template('home.html')
     else:
@@ -412,10 +413,14 @@ def user_count():
 def team_count():
     return len(query_db("select * from team"))
 
+def is_admin(email):
+    return email in admin_emails
+
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
 app.jinja_env.filters['gravatar'] = gravatar_url
 app.jinja_env.filters['possess'] = possess
+app.jinja_env.filters['is_admin'] = is_admin
 app.jinja_env.globals.update(user_count=user_count)
 app.jinja_env.globals.update(team_count=team_count)
 

@@ -18,7 +18,7 @@
 	<a href="{{ url_for('login') }}">sign in</a> |
 	{% endif %}
 	<a href="{{ url_for('faq') }}">FAQ</a>
-	{% if g.user['email'] == 'magrimes@mtu.edu' %}
+	{% if g.user['email'] | is_admin %}
 	| <a href="{{ url_for('admin') }}">admin</a>
 	{% endif %}
     </div>
