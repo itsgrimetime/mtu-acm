@@ -124,6 +124,19 @@ def user_profile(user_id):
 	return render_template('profile.html', profile_user=profile_user,
 		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
 
+@app.route('/user/<int:user_id>/delete', methods=['GET'])
+def delete_user(user_id):
+    if is_admin(g.user['email']):
+	db = get_db()
+	db.execute('delete from user where user_id = ?', [user_id])
+	db.commit()
+	return redirect(url_for('admin'))
+    else:
+	flash("You are not an administrator.")
+	return redirect(url_for('home'))
+
+
+
 @app.route('/team/<int:team_id>/leave', methods=['GET'])
 def leave_team(team_id):
     print "trying to leave team"
