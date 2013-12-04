@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}
+All Users
+{% endblock %}
+{% block body %}
+<h2>{{ self.title() }}</h2>
+{% if users %}
+<h3>Users</h3>
+<div class=admin>
+<table>
+    <tr>
+	<th>ID</th>
+	<th>Name</th>
+	<th>Email</th>
+	<th>Shirt Size</th>
+	<th>Team</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+	<td>{{ user.user_id }}</td>
+	<td><a href={{ url_for('user_profile', user_id=user.user_id) }}>{{ user.name }}</a></td>
+	<td>{{ user.email }}</td>
+	<td>{{ user.shirt_size }}</td>
+	{% if user['team_id'] %}
+	<td><a href={{ url_for('team_profile', team_id=user.team_id) }}>{{ user_data[user['user_id']].name }}</a></td>
+	{% else %}
+	<td></td>
+	{% endif %}
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% endif %}
+{% endblock %}

@@ -188,3 +188,8 @@ div.error {
     padding: 4px;
     font-size: 13px;
 }
+
+div.admin td, th {
+    padding-right: 20px;
+    padding-left: 40px;
+}

@@ -352,6 +352,20 @@ def register():
             return redirect(url_for('home'))
     return render_template('register.html', error=error)
 
+@app.route('/admin')
+def admin():
+    if g.user['email'] != "magrimes@mtu.edu":
+	flash("You are not an administrator.")
+	return render_template('home.html')
+    else:
+	user_data = {}
+	users = query_db('select * from user')
+	for user in users:
+	    if user['team_id']:
+		user_data[user['user_id']] = query_db('''
+		select * from team where team_id = ?''', [user['team_id']], one=True)
+	return render_template('admin.html', users=users, user_data=user_data)
+
 @app.route('/logout')
 def logout():
     """Logs the user out."""
@@ -371,7 +385,6 @@ def user_count():
 
 def team_count():
     return len(query_db("select * from team"))
-
 
 # add some filters to jinja
 app.jinja_env.filters['datetimeformat'] = format_datetime
