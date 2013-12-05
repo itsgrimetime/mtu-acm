@@ -106,11 +106,9 @@ def user_profile(user_id):
 	    db = get_db()
 	    if 'shirtsize' in request.form and request.form['shirtsize'] != \
 		    profile_user['shirt_size']:
-		print "form shirt size {form} profile {user}".format(form=request.form['shirtsize'], user=profile_user['shirt_size'])
 		db.execute('''update user set shirt_size = ? where user_id = ?
 		    ''', [request.form['shirtsize'], profile_user['user_id']])
 		flash('Shirt size updated.')
-	    print request.form
 	    learn = 1 if 'learn' in request.form else 0
 	    if learn != profile_user['learn']:
 		db.execute('''update user set learn = ? where user_id = ?
@@ -149,23 +147,19 @@ def delete_user(user_id):
 
 @app.route('/team/<int:team_id>/leave', methods=['GET'])
 def leave_team(team_id):
-    print "trying to leave team"
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     if g.user:
 	if g.user['team_id'] == team_id:
-	    print "user is on team"
 	    db = get_db()
 	    db.execute('update user set team_id = ? where user_id = ?', [None, g.user['user_id']])
 	    flash('You have left {team_name}'.format(team_name=team['name']))
 
 	    if len(query_db('select * from user where team_id = ?', [team_id])) < 1:
-		print "last team member"
 		db.execute('delete from team where team_id = ?', [team_id])
 		db.commit()
 		return redirect(url_for('user_profile', user_id=g.user['user_id']))
 
 	    if team['admin_id'] == g.user['user_id']:
-		print "setting new admin"
 		new_admin = query_db('select * from user where team_id = ?', [team_id], one=True)
 		db.execute('''update team set admin_id = ? where team_id = ?
 			''', [new_admin['user_id'], team_id])
@@ -202,7 +196,6 @@ def team_profile(team_id):
     members = query_db('select * from user where team_id = ?', [team_id])
 
     if request.method == 'POST':
-	print request.form
 	if g.user['user_id'] == team['admin_id']:
 	    db = get_db()
 	    if request.form['name']:
@@ -214,8 +207,10 @@ def team_profile(team_id):
 			    ''', [request.form['name'], team_id])
 		    flash('''{old_name} renamed to {new_name}
 			    '''.format(old_name=old_name, new_name=request.form['name']))
-	    if not team['skills'] or request.form['skills'].strip() != \
-		    team['skills'].strip() or ('looking' in request.form == team['looking']):
+	    update_skills = team['skills'] and request.form['skills'].strip() != \
+		    team['skills'].strip()
+	    update_looking = ('looking' in request.form) != team['looking']
+	    if update_looking or update_skills:
 		flash("Looking for members status updated.")
 		db.execute('''update team set looking = ?, skills = ? where team_id = ?
 		''', [1 if 'looking' in request.form else 0, request.form['skills'].strip(), team_id])
@@ -309,7 +304,6 @@ def team_register():
 	if not request.form['name']:
 	    if not request.form['select_name']:
 		error = 'You have to enter a valid team name'
-		print teams
 		return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
 	    else:
 		name = request.form['select_name']
