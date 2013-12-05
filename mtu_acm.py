@@ -214,8 +214,8 @@ def team_profile(team_id):
 			    ''', [request.form['name'], team_id])
 		    flash('''{old_name} renamed to {new_name}
 			    '''.format(old_name=old_name, new_name=request.form['name']))
-	    if request.form['skills'].strip() != team['skills'].strip() or \
-		    ('looking' in request.form == team['looking']):
+	    if not team['skills'] or request.form['skills'].strip() != \
+		    team['skills'].strip() or ('looking' in request.form == team['looking']):
 		flash("Looking for members status updated.")
 		db.execute('''update team set looking = ?, skills = ? where team_id = ?
 		''', [1 if 'looking' in request.form else 0, request.form['skills'].strip(), team_id])
