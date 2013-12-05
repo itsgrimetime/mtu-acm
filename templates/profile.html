@@ -15,7 +15,7 @@ Your Profile
     <a href="{{ url_for('team_profile', team_id=g.user.team_id) }}">{{ profile_user_team.name }}</a>.
     {% else %}
     You are not yet registered on a team!
-    Register <a href="{{ url_for('team_register') }}">here</a>.
+    Register a team <a href="{{ url_for('team_register') }}">here</a>, or find one to <a href="{{ url_for('find_team') }}">join</a>.
     {% endif %}
 </div>
 {% if not shirt_size %}
