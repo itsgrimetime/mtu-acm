@@ -21,14 +21,29 @@
 {% endif %}
 {% if g.user %}
 {% if team.admin_id == g.user.user_id %}
-<form action="" method=post>
+<form action="" method=post id=teamform>
     <h3>Edit Team:</h3>
     <dl>
 	<dt>Team Name:</dt>
 	<dd><input type=text name=name size=30 value"{{ request.form.name }}"></dd>
     </dl>
+    <dl>
+	<input type=checkbox name=looking {% if team['looking'] %} checked {% endif %} onClick="toggleVisibility(this)">This team is looking for additional members.
+    </dl>
+    <div id="hidden" style="display: {% if team['looking'] %} block {% else %} none {% endif %};">
+	<dl>
+	    <textarea name=skills form=teamform rows=5 cols=40>{% if team['skills'] %}{{ team['skills'] }} {% else %} What kind of skills are you looking for in a teammate? This will be posted to help users find teams.{% endif %}</textarea>
+	</dl>
+    </div>
     <div class=actions><input type=submit value="Apply"></div>
 </form>
+<script type="text/javascript" language="javascript">
+    function toggleVisibility(cb) {
+	var div = document.getElementById("hidden");
+	if (cb.checked == true) div.style.display = "block";
+	else div.style.display = "none";
+    }
+</script>
 {% endif %}
 {% if g.user.user_id == team.admin_id %}
 <h3><a href={{ url_for('team_delete', team_id=team.team_id) }}>Delete this team</a></h3>

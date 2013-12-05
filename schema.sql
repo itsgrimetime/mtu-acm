@@ -15,5 +15,7 @@ create table if not exists team (
     team_id integer primary key autoincrement,
     name text not null,
     admin_id integer,
-    hardware integer
+    hardware integer,
+    looking integer,
+    skills text
 );

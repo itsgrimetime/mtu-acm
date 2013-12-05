@@ -1,6 +1,7 @@
 <!doctype html>
 <title>{% block title %}Welcome{% endblock %} | TechHacks</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico') }}">
 <div class=page>
     <h1>TechHacks</h1>
     <div class=navigation>
@@ -20,6 +21,9 @@
 	<a href="{{ url_for('faq') }}">FAQ</a>
 	{% if g.user['email'] | is_admin %}
 	| <a href="{{ url_for('admin') }}">admin</a>
+	{% endif %}
+	{% if not g.user['team_id'] %}
+	| <a href="{{ url_for('find_team') }}">find a team</a>
 	{% endif %}
     </div>
     {% with flashes = get_flashed_messages() %}

@@ -198,3 +198,10 @@ div.admin td, th {
     padding-right: 15px;
     padding-left: 15px;
 }
+
+hr {
+    height: 2px;
+    background-color: #ED9728;
+    color: #ED9728;
+    border: 0px;
+}

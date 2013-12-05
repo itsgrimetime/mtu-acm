@@ -170,9 +170,7 @@ def leave_team(team_id):
 		db.execute('''update team set admin_id = ? where team_id = ?
 			''', [new_admin['user_id'], team_id])
 
-	    print "doing commit"
 	    db.commit()
-	    print "trying to redirect"
 	    return redirect(url_for('team_profile', team_id=team_id))
 	else:
 	    error = "You are not on that team."
@@ -204,23 +202,26 @@ def team_profile(team_id):
     members = query_db('select * from user where team_id = ?', [team_id])
 
     if request.method == 'POST':
-	print "in post"
+	print request.form
 	if g.user['user_id'] == team['admin_id']:
-	    print "in thing"
-	    if len(request.form['name']) > 52:
-		error = "Team name must be less than 52 characters."
-	    elif not request.form['name']:
-		error = "Please enter a team name."
-	    else:
-		db = get_db()
-		old_name = team['name']
-		db.execute('''update team set name = ? where team_id = ?
-			''', [request.form['name'], team_id])
-		db.commit()
-		flash('''{old_name} renamed to {new_name}
-			'''.format(old_name=old_name, new_name=request.form['name']))
-		return redirect(url_for('team_profile', team_id=team_id))
-	    return render_template('team_profile.html', team=team, error=error, members=members)
+	    db = get_db()
+	    if request.form['name']:
+		if len(request.form['name']) > 52:
+		    error = "Team name must be less than 52 characters."
+		else:
+		    old_name = team['name']
+		    db.execute('''update team set name = ? where team_id = ?
+			    ''', [request.form['name'], team_id])
+		    flash('''{old_name} renamed to {new_name}
+			    '''.format(old_name=old_name, new_name=request.form['name']))
+	    if request.form['skills'].strip() != team['skills'].strip() or \
+		    ('looking' in request.form == team['looking']):
+		flash("Looking for members status updated.")
+		db.execute('''update team set looking = ?, skills = ? where team_id = ?
+		''', [1 if 'looking' in request.form else 0, request.form['skills'].strip(), team_id])
+	    db.commit()
+	    return redirect(url_for('team_profile', team_id=team_id))
+
 	else:
 	    error = "You are not the administrator of this team."
 	    return render_template('team_profile.html', team=team, error=error)
@@ -262,6 +263,28 @@ def login():
             session['user_id'] = user['user_id']
 	    return redirect(url_for('user_profile', user_id=session['user_id']))
     return render_template('login.html', error=error)
+
+@app.route('/team/<int:team_id>/join')
+def join_team(team_id):
+    """Adds the current user as a member of the team, given
+    the team is looking for members and the team is not already full"""
+    user_count = len(query_db('select * from user where team_id = ?', [team_id]))
+    if g.user:
+	if g.user['team_id']:
+	    flash("You are already on a team.")
+	elif user_count >= 5:
+	    flash("That team is full.")
+	else:
+	    db = get_db()
+	    db.execute('update user set team_id = ? where user_id = ?', [team_id, g.user['user_id']])
+	    db.commit()
+	    team = query_db('select * from team where team_id = ?', [team_id], one=True)
+	    flash('You successfully joined {team}'.format(team=team['name']))
+	return redirect(url_for('team_profile', team_id=team_id))
+    else:
+	flash("You are not logged in.")
+	return redirect(url_for('home'))
+
 
 @app.route('/team_register', methods=['GET', 'POST'])
 def team_register():
@@ -390,16 +413,17 @@ def register():
             return redirect(url_for('home'))
     return render_template('register.html', error=error)
 
-@app.route('/find')
+
+@app.route('/find_team')
 def find_team():
     if not g.user:
 	flash('You need to be logged in to do that.')
-	redirect(url_for('home'))
+	return redirect(url_for('home'))
     elif g.user['team_id']:
 	flash('You are already on a team.')
-	redirect(url_for('home'))
+	return redirect(url_for('home'))
     else:
-	teams = query_db('select * from team where needs_members = 1')
+	teams = query_db('select t.team_id, t.name, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
 	return render_template('find_team.html', teams=teams)
 	# select all teams who are looking for people
 	# pass them to template :)
