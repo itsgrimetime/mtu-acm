@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 {% block title %}
-All Users
+Admin Panel
 {% endblock %}
 {% block body %}
 <h2>{{ self.title() }}</h2>
 {% if users %}
-<h3>Users</h3>
+<center>
 <div class=admin>
 <table>
     <tr>
 	<th>ID</th>
 	<th>Name</th>
 	<th>Email</th>
-	<th>Shirt Size</th>
-	<th>Team</th>
+	<th>Size</th>
+	<th>Team Name</th>
 	<th>Delete</th>
+	<th>Learn?</th>
     </tr>
     {% for user in users %}
     <tr>
@@ -23,14 +24,16 @@ All Users
 	<td>{{ user.email }}</td>
 	<td>{{ user.shirt_size }}</td>
 	{% if user['team_id'] %}
-	<td><a href={{ url_for('team_profile', team_id=user.team_id) }}>{{ user_data[user['user_id']].name }}</a></td>
+	<td><a href={{ url_for('team_profile', team_id=user.team_id) }}>{{ user_data[user['user_id']].name[0:10] }}...</a></td>
 	{% else %}
 	<td></td>
 	{% endif %}
 	<td><a href={{ url_for('delete_user', user_id=user.user_id) }}>Delete User</a></td>
+	<td>{% if user['learn'] %}Yes{% else %}No{% endif %}</td>
     </tr>
     {% endfor %}
 </table>
 </div>
+</center>
 {% endif %}
 {% endblock %}

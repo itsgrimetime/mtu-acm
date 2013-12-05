@@ -101,12 +101,25 @@ def user_profile(user_id):
     profile_user = query_db('select * from user where user_id = ?',
                             [user_id], one=True)
 
-    if request.method == 'POST' and profile_user['user_id'] == g.user['user_id']:
-	if 'shirtsize' in request.form:
+    if request.method == 'POST':
+	if profile_user['user_id'] == g.user['user_id']:
 	    db = get_db()
-	    db.execute('''update user set shirt_size = ? where user_id = ?
-		''', [request.form['shirtsize'], g.user['user_id']])
+	    if 'shirtsize' in request.form and request.form['shirtsize'] != \
+		    profile_user['shirt_size']:
+		print "form shirt size {form} profile {user}".format(form=request.form['shirtsize'], user=profile_user['shirt_size'])
+		db.execute('''update user set shirt_size = ? where user_id = ?
+		    ''', [request.form['shirtsize'], profile_user['user_id']])
+		flash('Shirt size updated.')
+	    print request.form
+	    learn = 1 if 'learn' in request.form else 0
+	    if learn != profile_user['learn']:
+		db.execute('''update user set learn = ? where user_id = ?
+			''', [1 if 'learn' in request.form else 0, profile_user['user_id']])
+		flash('Learn status updated.')
 	    db.commit()
+
+	else:
+	    flash("You are not authorized to do that.")
 	return redirect(url_for('user_profile', user_id = g.user['user_id']))
 
     else:
@@ -118,11 +131,8 @@ def user_profile(user_id):
 
 	if profile_user is None:
 	    abort(404)
-	# this is messy, I don't like always giving the template the shirt size
-	# but I guess we can always just check to see if g.user == profile_user and
-	# only display it if true
 	return render_template('profile.html', profile_user=profile_user,
-		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'])
+		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'], learn=profile_user['learn'])
 
 @app.route('/user/<int:user_id>/delete', methods=['GET'])
 def delete_user(user_id):
@@ -197,8 +207,8 @@ def team_profile(team_id):
 	print "in post"
 	if g.user['user_id'] == team['admin_id']:
 	    print "in thing"
-	    if len(request.form['name']) > 62:
-		error = "Team name must be less than 62 characters."
+	    if len(request.form['name']) > 52:
+		error = "Team name must be less than 52 characters."
 	    elif not request.form['name']:
 		error = "Please enter a team name."
 	    else:
@@ -237,7 +247,7 @@ def add_message():
 def login():
     """Logs the user in."""
     if g.user:
-        return redirect(url_for('user_profile', user_id=g.user.id))
+        return redirect(url_for('user_profile', user_id=g.user['user_id']))
     error = None
     if request.method == 'POST':
         user = query_db('''select * from user where
@@ -352,8 +362,9 @@ def register():
     error = None
     if request.method == 'POST':
 	if not request.form['name']:
-	    print "no name"
 	    error = 'You have to enter a valid name'
+	elif len(request.form['name']) > 52:
+	    error = 'Name must be less than 52 characters' 
         elif not request.form['email']:
             error = 'You have to enter a valid email address'
         elif not request.form['password']:
@@ -363,15 +374,16 @@ def register():
         elif get_user_id(request.form['email']) is not None:
             error = 'The email is already registered'
 	elif 'shirtsize' not in request.form:
-	    error = 'You need to pick a t-shirt size!'
+	    error = 'You need to pick a t-shirt size.'
         else:
             db = get_db()
             db.execute('''insert into user (
-              name, email, shirt_size, pw_hash) values (?, ?, ?, ?)''',
+              name, email, shirt_size, pw_hash, learn) values (?, ?, ?, ?, ?)''',
               [request.form['name'], request.form['email'], request.form['shirtsize'],
-               generate_password_hash(request.form['password'])])
+               generate_password_hash(request.form['password']), \
+		       1 if 'learn' in request.form else 0])
             db.commit()
-            flash('You were successfully registered and are now logged in')
+            flash('Registration successful. You are now logged in.')
 	    user = query_db('''select * from user where email = ?
 		    ''', [request.form['email']], one=True)
             session['user_id'] = user['user_id']
@@ -420,7 +432,6 @@ def possess(name):
 	return ''.join([name, '\'s'])
 
 def user_count():
-    print "here"
     return len(query_db("select * from user"))
 
 def team_count():

@@ -18,21 +18,23 @@ Your Profile
     Register <a href="{{ url_for('team_register') }}">here</a>.
     {% endif %}
 </div>
-{% if shirt_size %}
-<p>Your selected shirt size is: {{ shirt_size }}</p>
-{% else %}
+{% if not shirt_size %}
 <p>You haven't selected a shirt size yet!</p>
 {% endif %}
+<br>
 <form action="" method=post>
     <dt>Shirt Size:
     <dl>
-	<input type=radio name=shirtsize value="S">Small
-	<input type=radio name=shirtsize value="M">Medium
-	<input type=radio name=shirtsize value="L">Large
-	<input type=radio name=shirtsize value="XL">Extra Large
-	<input type=radio name=shirtsize value="2XL">2X Large
+	<input type=radio name=shirtsize value="S" {% if shirt_size == "S" %} checked {% endif %}>Small
+	<input type=radio name=shirtsize value="M" {% if shirt_size == "M" %} checked {% endif %}>Medium
+	<input type=radio name=shirtsize value="L" {% if shirt_size == "L" %} checked {% endif %}>Large
+	<input type=radio name=shirtsize value="XL" {% if shirt_size == "XL" %} checked {% endif %}>Extra Large
+	<input type=radio name=shirtsize value="2XL" {% if shirt_size == "2XL" %} checked {% endif %}>2X Large
     </dl>
     </dt>
+    <dl>
+	<input type=checkbox name=learn {% if learn %} checked {% endif %}>I would like to learn how to program
+    </dl>
     <div class=actions><input type=submit value="Apply Changes"></div>
 </form>
 {% else %}
