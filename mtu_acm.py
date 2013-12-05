@@ -24,7 +24,7 @@ DATABASE = '/tmp/mtu_acm.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 
-admin_emails = ["magrimes@mtu.edu"]
+admin_emails = ["magrimes@mtu.edu", "tjscanlo@mtu.edu", "kelwert@mtu.edu"]
 
 # create our little application :)
 app = Flask(__name__)
