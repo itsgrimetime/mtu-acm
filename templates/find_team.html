@@ -12,7 +12,7 @@ All Teams
     <h3>
 	<a href={{ url_for('team_profile', team_id=team.team_id) }}>{{ team.name }}</a>
     </h3>
-    <p> <strong>Looking for:</strong> {%if team['skills'] %} {{ team['skills'] }} {% else %}N/A{% endif %}</p>
+    <p> <strong>Looking for:</strong> {% if team['skills'] != None %} {{ team['skills'] }} {% else %}N/A{% endif %}</p>
     <p> <strong><a href={{ url_for('join_team', team_id=team.team_id) }}>Join Team</a></strong>
 </ul>
 <hr>

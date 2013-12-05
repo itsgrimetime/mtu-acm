@@ -423,7 +423,7 @@ def find_team():
 	flash('You are already on a team.')
 	return redirect(url_for('home'))
     else:
-	teams = query_db('select t.team_id, t.name, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
+	teams = query_db('select t.team_id, t.name, t.skills, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
 	return render_template('find_team.html', teams=teams)
 	# select all teams who are looking for people
 	# pass them to template :)
