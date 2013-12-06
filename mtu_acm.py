@@ -441,31 +441,49 @@ def find_team():
         teams = query_db('select t.team_id, t.name, t.skills, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
         return render_template('find_team.html', teams=teams)
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    ''' builds the data for the admin panel page - this
-    can be optimized a lot more '''
-    if not g.user or not is_admin(g.user['email']):
-        flash("You are not an administrator.")
-        return render_template('home.html')
-    else:
-        user_data = {}
+    '''builds the data for the admin panel page - this
+    can be optimized a lot more'''
+
+    if request.method == 'POST':
         users = query_db('select * from user')
-        team_data = {}
-        teams = query_db('select * from team')
-        for team in teams:
-            team_data[team['team_id']] = []
-        for user in users:
-            if user['team_id']:
-                print "adding"
-                team_data[user['team_id']].append(user)
+        if not g.user or not is_admin(g.user['email']):
+            flash("You are not an administrator.")
+            return redirect('home.html')
+        else:
+            if request.form:
+                print request.form
+                db = get_db()
+                for user in users:
+                    if str(user['user_id']) in request.form:
+                        print "setting user " + str(user['user_id'])
+                        db.execute('''update user set checked_in = ? where user_id = ?
+                                ''', [1, user['user_id']])
+                db.commit()
+                flash("Users successfully checked-in")
+        return redirect('admin')
+    else:
+        if not g.user or not is_admin(g.user['email']):
+            flash("You are not an administrator.")
+            return render_template('home.html')
+        else:
+            user_data = {}
+            users = query_db('select * from user')
+            team_data = {}
+            teams = query_db('select * from team')
+            for team in teams:
+                team_data[team['team_id']] = []
+            for user in users:
+                if user['team_id']:
+                    team_data[user['team_id']].append(user)
 
-        for user in users:
-            if user['team_id']:
-                user_data[user['user_id']] = query_db('''
-                select * from team where team_id = ?''', [user['team_id']], one=True)
+            for user in users:
+                if user['team_id']:
+                    user_data[user['user_id']] = query_db('''
+                    select * from team where team_id = ?''', [user['team_id']], one=True)
 
-        return render_template('admin.html', users=users, user_data=user_data, teams=teams, team_data=team_data)
+            return render_template('admin.html', users=users, user_data=user_data, teams=teams, team_data=team_data)
 
 @app.route('/logout')
 def logout():

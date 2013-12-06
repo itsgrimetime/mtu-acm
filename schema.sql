@@ -7,6 +7,7 @@ create table if not exists user (
   team_id integer,
   shirt_size text,
   learn integer,
+  checked_in integer,
   pw_hash text not null
 );
 

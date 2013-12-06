@@ -6,34 +6,40 @@ Admin Panel
 <h2>{{ self.title() }}</h2>
 {% if users %}
 <center>
-<h3>All Users</h3>
-    <div class=admin>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Size</th>
-                <th>Team Name</th>
-                <th>Learn?</th>
-                <th>Delete</th>
-            </tr>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.user_id }}</td>
-                <td><a href={{ url_for('user_profile', user_id=user.user_id) }}>{{ user.name }}</a></td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.shirt_size }}</td>
-                {% if user['team_id'] %}
-                <td><a href={{ url_for('team_profile', team_id=user.team_id) }}>{{ user_data[user['user_id']].name[0:8] }}..</a></td>
-                {% else %}
-                <td></td>
-                {% endif %}
-                <td>{% if user['learn'] %}Yes{% else %}No{% endif %}</td>
-                <td><a href={{ url_for('delete_user', user_id=user.user_id) }}>Delete User</a></td>
-            </tr>
-            {% endfor %}
-        </table>
+    <h3>All Users</h3>
+    <form action="" method=post>
+        <div class=admin>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Size</th>
+                    <th>Team Name</th>
+                    <th>Learn?</th>
+                    <th>Delete</th>
+                    <th>Checked-In</th>
+                </tr>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.user_id }}</td>
+                    <td><a href={{ url_for('user_profile', user_id=user.user_id) }}>{{ user.name }}</a></td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.shirt_size }}</td>
+                    {% if user['team_id'] %}
+                    <td><a href={{ url_for('team_profile', team_id=user.team_id) }}>{{ user_data[user['user_id']].name[0:8] }}..</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    <td>{% if user['learn'] %}Yes{% else %}No{% endif %}</td>
+                    <td><a href={{ url_for('delete_user', user_id=user.user_id) }}>Delete User</a></td>
+                    <td><input type=checkbox name={{user.user_id}} {%if user.checked_in %}checked{% endif %}></td>
+                </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <div class=actions><input type=submit value="Submit"></div>
+        </form>
         {% endif %}
         {% if teams %}
         <h3>All Teams</h3>
