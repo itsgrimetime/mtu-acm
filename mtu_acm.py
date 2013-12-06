@@ -24,7 +24,7 @@ DATABASE = '/tmp/mtu_acm.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 
-admin_emails = ["magrimes@mtu.edu", "tjscanlo@mtu.edu", "kelwert@mtu.edu"]
+admin_emails = ["magrimes@mtu.edu", "tjscanlo@mtu.edu", "kelwert@mtu.edu", "ntpeters@mtu.edu"]
 
 # create our little application :)
 app = Flask(__name__)
@@ -135,6 +135,10 @@ def user_profile(user_id):
 @app.route('/schedule', methods=['GET'])
 def schedule():
     return render_template('schedule.html')
+
+@app.route('/rules', methods=['GET'])
+def rules():
+    return render_template('rules.html')
 
 @app.route('/user/<int:user_id>/delete', methods=['GET'])
 def delete_user(user_id):

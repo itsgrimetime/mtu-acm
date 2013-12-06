@@ -18,7 +18,8 @@
 	<a href="{{ url_for('register') }}">sign up</a> |
 	<a href="{{ url_for('login') }}">sign in</a> |
 	{% endif %}
-	<a href="{{ url_for('faq') }}">faq</a> |
+    <a href="{{ url_for('faq') }}">faq</a> |
+    <a href="{{ url_for('rules') }}">rules</a> |
 	<a href="{{ url_for('schedule') }}">schedule</a>
 	{% if g.user['email'] | is_admin %}
 	| <a href="{{ url_for('admin') }}">admin</a>
