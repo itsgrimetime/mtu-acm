@@ -429,17 +429,29 @@ def find_team():
 
 @app.route('/admin')
 def admin():
+    ''' builds the data for the admin panel page - this
+    can be optimized a lot more '''
     if not g.user or not is_admin(g.user['email']):
         flash("You are not an administrator.")
         return render_template('home.html')
     else:
         user_data = {}
         users = query_db('select * from user')
+        team_data = {}
+        teams = query_db('select * from team')
+        for team in teams:
+            team_data[team['team_id']] = []
         for user in users:
             if user['team_id']:
+                team_data[user['team_id']].append(user)
+
+        for user in users:
+            if user['team_id']:
+                print "user has a team"
                 user_data[user['user_id']] = query_db('''
                 select * from team where team_id = ?''', [user['team_id']], one=True)
-        return render_template('admin.html', users=users, user_data=user_data)
+
+        return render_template('admin.html', users=users, user_data=user_data, teams=teams, team_data=team_data)
 
 @app.route('/logout')
 def logout():
