@@ -363,7 +363,7 @@ def all_users():
 @app.route('/teams', methods=['GET'])
 def all_teams():
     if g.user:
-        teams = query_db('select t.team_id, t.name, count(u.user_id) as size from team t left join user u on t.team_id=u.team_id group by u.user_id order by size, t.name')
+        teams = query_db('select t.team_id, t.name, count(u.user_id) as size from team t left join user u on t.team_id=u.team_id group by t.team_id order by size, t.name')
         return render_template('teams.html', teams=teams)
 
 @app.route('/faq', methods=['GET'])
