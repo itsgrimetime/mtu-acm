@@ -3,7 +3,6 @@
 {{ team.name }} {% if team.hardware %} (Hardware) {% endif %}
 {% endblock %}
 {% block body %}
-{% if error %}<div class=error><strong>Error:</strong> {{ error }}</div>{% endif %}
 <h2>{{ self.title() }}</h2>
 {% if g.user['team_id'] == team.team_id %}
 <a href="{{ url_for('leave_team', team_id=team.team_id) }}">Leave this team</a>

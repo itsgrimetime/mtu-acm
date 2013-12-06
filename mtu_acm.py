@@ -71,7 +71,7 @@ def get_user_id(email):
 def get_team_id(name):
     """Convenience method to look up the id for a team."""
     rv = query_db('select team_id from team where name = ?',
-	    [name], one=True)
+            [name], one=True)
     return rv[0] if rv else None
 
 def format_datetime(timestamp):
@@ -102,35 +102,35 @@ def user_profile(user_id):
                             [user_id], one=True)
 
     if request.method == 'POST':
-	if profile_user['user_id'] == g.user['user_id']:
-	    db = get_db()
-	    if 'shirtsize' in request.form and request.form['shirtsize'] != \
-		    profile_user['shirt_size']:
-		db.execute('''update user set shirt_size = ? where user_id = ?
-		    ''', [request.form['shirtsize'], profile_user['user_id']])
-		flash('Shirt size updated.')
-	    learn = 1 if 'learn' in request.form else 0
-	    if learn != profile_user['learn']:
-		db.execute('''update user set learn = ? where user_id = ?
-			''', [1 if 'learn' in request.form else 0, profile_user['user_id']])
-		flash('Learn status updated.')
-	    db.commit()
+        if profile_user['user_id'] == g.user['user_id']:
+            db = get_db()
+            if 'shirtsize' in request.form and request.form['shirtsize'] != \
+                    profile_user['shirt_size']:
+                db.execute('''update user set shirt_size = ? where user_id = ?
+                    ''', [request.form['shirtsize'], profile_user['user_id']])
+                flash('Shirt size updated.')
+            learn = 1 if 'learn' in request.form else 0
+            if learn != profile_user['learn']:
+                db.execute('''update user set learn = ? where user_id = ?
+                        ''', [1 if 'learn' in request.form else 0, profile_user['user_id']])
+                flash('Learn status updated.')
+            db.commit()
 
-	else:
-	    flash("You are not authorized to do that.")
-	return redirect(url_for('user_profile', user_id = g.user['user_id']))
+        else:
+            flash("You are not authorized to do that.")
+        return redirect(url_for('user_profile', user_id = g.user['user_id']))
 
     else:
-	if profile_user['team_id'] != None:
-	    profile_user_team = query_db('select * from team where team_id = ?',
-		    [profile_user['team_id']], one=True)
-	else:
-	    profile_user_team = None
+        if profile_user['team_id'] != None:
+            profile_user_team = query_db('select * from team where team_id = ?',
+                    [profile_user['team_id']], one=True)
+        else:
+            profile_user_team = None
 
-	if profile_user is None:
-	    abort(404)
-	return render_template('profile.html', profile_user=profile_user,
-		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'], learn=profile_user['learn'])
+        if profile_user is None:
+            abort(404)
+        return render_template('profile.html', profile_user=profile_user,
+                profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'], learn=profile_user['learn'])
 
 @app.route('/schedule', methods=['GET'])
 def schedule():
@@ -139,13 +139,13 @@ def schedule():
 @app.route('/user/<int:user_id>/delete', methods=['GET'])
 def delete_user(user_id):
     if is_admin(g.user['email']):
-	db = get_db()
-	db.execute('delete from user where user_id = ?', [user_id])
-	db.commit()
-	return redirect(url_for('admin'))
+        db = get_db()
+        db.execute('delete from user where user_id = ?', [user_id])
+        db.commit()
+        return redirect(url_for('admin'))
     else:
-	flash("You are not an administrator.")
-	return redirect(url_for('home'))
+        flash("You are not an administrator.")
+        return redirect(url_for('home'))
 
 
 
@@ -153,44 +153,44 @@ def delete_user(user_id):
 def leave_team(team_id):
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
     if g.user:
-	if g.user['team_id'] == team_id:
-	    db = get_db()
-	    db.execute('update user set team_id = ? where user_id = ?', [None, g.user['user_id']])
-	    flash('You have left {team_name}'.format(team_name=team['name']))
+        if g.user['team_id'] == team_id:
+            db = get_db()
+            db.execute('update user set team_id = ? where user_id = ?', [None, g.user['user_id']])
+            flash('You have left {team_name}'.format(team_name=team['name']))
 
-	    if len(query_db('select * from user where team_id = ?', [team_id])) < 1:
-		db.execute('delete from team where team_id = ?', [team_id])
-		db.commit()
-		return redirect(url_for('user_profile', user_id=g.user['user_id']))
+            if len(query_db('select * from user where team_id = ?', [team_id])) < 1:
+                db.execute('delete from team where team_id = ?', [team_id])
+                db.commit()
+                return redirect(url_for('user_profile', user_id=g.user['user_id']))
 
-	    if team['admin_id'] == g.user['user_id']:
-		new_admin = query_db('select * from user where team_id = ?', [team_id], one=True)
-		db.execute('''update team set admin_id = ? where team_id = ?
-			''', [new_admin['user_id'], team_id])
+            if team['admin_id'] == g.user['user_id']:
+                new_admin = query_db('select * from user where team_id = ?', [team_id], one=True)
+                db.execute('''update team set admin_id = ? where team_id = ?
+                        ''', [new_admin['user_id'], team_id])
 
-	    db.commit()
-	    return redirect(url_for('team_profile', team_id=team_id))
-	else:
-	    error = "You are not on that team."
-	    return redirect(url_for('team_profile', team_id=team_id))
+            db.commit()
+            return redirect(url_for('team_profile', team_id=team_id))
+        else:
+            flash("You are not on that team.")
+            return redirect(url_for('team_profile', team_id=team_id))
     else:
-	error = "You are not logged in."
-	return redirect(url_for('team_profile.html', team_id=team_id))
+        flash("You are not logged in.")
+        return redirect(url_for('team_profile.html', team_id=team_id))
 
 @app.route('/team/<int:team_id>/delete', methods=['GET'])
 def team_delete(team_id):
     team = query_db('select * from team where team_id = ?', [team_id], one=True)
 
     if g.user['user_id'] == team['admin_id']:
-	db = get_db()
-	db.execute('delete from team where team_id = ?', [team_id])
-	db.execute('update user set team_id = ? where team_id = ?', [None, team_id])
-	db.commit()
-	flash("{team_name} has been deleted.".format(team_name=team['name']))
-	return redirect(url_for('user_profile', user_id=g.user['user_id']))
+        db = get_db()
+        db.execute('delete from team where team_id = ?', [team_id])
+        db.execute('update user set team_id = ? where team_id = ?', [None, team_id])
+        db.commit()
+        flash("{team_name} has been deleted.".format(team_name=team['name']))
+        return redirect(url_for('user_profile', user_id=g.user['user_id']))
     else:
-	error = "You are not the administrator of this team."
-	return render_template('team_profile', team_id=team_id, error=error)
+        flash("You are not the administrator of this team.")
+        return render_template('team_profile', team_id=team_id)
 
 
 @app.route('/team/<int:team_id>', methods=['GET', 'POST'])
@@ -200,34 +200,34 @@ def team_profile(team_id):
     members = query_db('select * from user where team_id = ?', [team_id])
 
     if request.method == 'POST':
-	if g.user['user_id'] == team['admin_id']:
-	    db = get_db()
-	    if request.form['name']:
-		if len(request.form['name']) > 52:
-		    error = "Team name must be less than 52 characters."
-		else:
-		    old_name = team['name']
-		    db.execute('''update team set name = ? where team_id = ?
-			    ''', [request.form['name'], team_id])
-		    flash('''{old_name} renamed to {new_name}
-			    '''.format(old_name=old_name, new_name=request.form['name']))
-	    update_skills = team['skills'] and request.form['skills'].strip() != \
-		    team['skills'].strip()
-	    update_looking = ('looking' in request.form) != team['looking']
-	    if update_looking or update_skills:
-		flash("Looking for members status updated.")
-		db.execute('''update team set looking = ?, skills = ? where team_id = ?
-		''', [1 if 'looking' in request.form else 0, request.form['skills'].strip(), team_id])
-	    db.commit()
-	    return redirect(url_for('team_profile', team_id=team_id))
+        if g.user['user_id'] == team['admin_id']:
+            db = get_db()
+            if request.form['name']:
+                if len(request.form['name']) > 52:
+                    flash("Team name must be less than 52 characters.")
+                else:
+                    old_name = team['name']
+                    db.execute('''update team set name = ? where team_id = ?
+                            ''', [request.form['name'], team_id])
+                    flash('''{old_name} renamed to {new_name}
+                            '''.format(old_name=old_name, new_name=request.form['name']))
+            update_skills = team['skills'] and request.form['skills'].strip() != \
+                    team['skills'].strip()
+            update_looking = ('looking' in request.form) != team['looking']
+            if update_looking or update_skills:
+                flash("Looking for members status updated.")
+                db.execute('''update team set looking = ?, skills = ? where team_id = ?
+                ''', [1 if 'looking' in request.form else 0, request.form['skills'].strip(), team_id])
+            db.commit()
+            return redirect(url_for('team_profile', team_id=team_id))
 
-	else:
-	    error = "You are not the administrator of this team."
-	    return render_template('team_profile.html', team=team, error=error)
+        else:
+            flash("You are not the administrator of this team.")
+            return render_template('team_profile.html', team=team)
     else:
-	if team is None:
-	    abort(404)
-	return render_template('team_profile.html', team=team, members=members)
+        if team is None:
+            abort(404)
+        return render_template('team_profile.html', team=team, members=members)
 
 @app.route('/add_message', methods=['POST'])
 def add_message():
@@ -260,8 +260,10 @@ def login():
         else:
             flash('You were logged in')
             session['user_id'] = user['user_id']
-	    return redirect(url_for('user_profile', user_id=session['user_id']))
-    return render_template('login.html', error=error)
+            return redirect(url_for('user_profile', user_id=session['user_id']))
+    if error:
+        flash(error)
+    return render_template('login.html')
 
 @app.route('/team/<int:team_id>/join')
 def join_team(team_id):
@@ -269,20 +271,20 @@ def join_team(team_id):
     the team is looking for members and the team is not already full"""
     user_count = len(query_db('select * from user where team_id = ?', [team_id]))
     if g.user:
-	if g.user['team_id']:
-	    flash("You are already on a team.")
-	elif user_count >= 5:
-	    flash("That team is full.")
-	else:
-	    db = get_db()
-	    db.execute('update user set team_id = ? where user_id = ?', [team_id, g.user['user_id']])
-	    db.commit()
-	    team = query_db('select * from team where team_id = ?', [team_id], one=True)
-	    flash('You successfully joined {team}'.format(team=team['name']))
-	return redirect(url_for('team_profile', team_id=team_id))
+        if g.user['team_id']:
+            flash("You are already on a team.")
+        elif user_count >= 5:
+            flash("That team is full.")
+        else:
+            db = get_db()
+            db.execute('update user set team_id = ? where user_id = ?', [team_id, g.user['user_id']])
+            db.commit()
+            team = query_db('select * from team where team_id = ?', [team_id], one=True)
+            flash('You successfully joined {team}'.format(team=team['name']))
+        return redirect(url_for('team_profile', team_id=team_id))
     else:
-	flash("You are not logged in.")
-	return redirect(url_for('home'))
+        flash("You are not logged in.")
+        return redirect(url_for('home'))
 
 
 @app.route('/team_register', methods=['GET', 'POST'])
@@ -294,82 +296,75 @@ def team_register():
     join_team = len(teams) > 0
 
     if g.user['team_id'] is not None:
-	flash("You are already signed up for a team.")
-	return redirect(url_for('team_profile', team_id=g.user['team_id']))
+        flash("You are already signed up for a team.")
+        return redirect(url_for('team_profile', team_id=g.user['team_id']))
 
     if not g.user:
-	flash('You need to be logged in to do that.')
-	return redirect(url_for('login'))
+        flash('You need to be logged in to do that.')
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
 
-	hardware = 0
-	create_team = False
-	if not request.form['name']:
-	    if not request.form['select_name']:
-		error = 'You have to enter a valid team name'
-		return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
-	    else:
-		name = request.form['select_name']
-	else:
-	    create_team = True
-	    if 'hardware' in request.form:
-		hardware = 1
-	    name = request.form['name']
-	    if len(name) > 62:
-		error = 'Team name must be less than 62 characters long'
-		return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
+        hardware = 0
+        create_team = False
+        if not request.form['name']:
+            if not request.form['select_name']:
+                flash('You have to enter a valid team name')
+                return render_template('team_register.html', teams=teams, join_team=join_team)
+            else:
+                name = request.form['select_name']
+        else:
+            create_team = True
+            if 'hardware' in request.form:
+                hardware = 1
+            name = request.form['name']
+            if len(name) > 62:
+                flash('Team name must be less than 62 characters long')
+                return render_template('team_register.html', teams=teams, join_team=join_team)
 
-	db = get_db()
-	flash_string = 'joined'
-	team_id = get_team_id(name)
-	if create_team:
-	    if team_id is not None:
-		error = 'That team name is already taken'
-	    else:
-		db.execute('''insert into team (name, admin_id, hardware) values
-			(?, ?, ?)''', [name, g.user['user_id'], hardware])
-		db.commit()
-		flash_string = 'created'
-		team_id = get_team_id(name) # gotta get team id so we can build url
+        db = get_db()
+        flash_string = 'joined'
+        team_id = get_team_id(name)
+        if create_team:
+            if team_id is not None:
+                flash('That team name is already taken')
+            else:
+                db.execute('''insert into team (name, admin_id, hardware) values
+                        (?, ?, ?)''', [name, g.user['user_id'], hardware])
+                db.commit()
+                flash_string = 'created'
+                team_id = get_team_id(name) # gotta get team id so we can build url
 
-	current_members = query_db('''select * from user where team_id = ?''', [team_id])
+        current_members = query_db('''select * from user where team_id = ?''', [team_id])
 
-	if len(current_members) > 4:
-	    error = '''{team_name} is currently full, please choose another team
-		or create a new one.'''.format(team_name=name)
-	    return render_template('team_register.html', error=error, teams=teams)
-	else:
-	    db.execute('''update user set team_id = ?
-			    where user_id = ?''', [team_id, g.user['user_id']])
-	    db.commit()
-	    flash('''You successfully {flash_string} {team_name}!
-		    '''.format(flash_string=flash_string, team_name=name))
-	    return redirect(url_for('team_profile', team_id=team_id))
+        if len(current_members) > 4:
+            flash('''{team_name} is currently full, please choose another team
+                or create a new one.'''.format(team_name=name))
+            return render_template('team_register.html', teams=teams)
+        else:
+            db.execute('''update user set team_id = ?
+                            where user_id = ?''', [team_id, g.user['user_id']])
+            db.commit()
+            flash('''You successfully {flash_string} {team_name}!
+                    '''.format(flash_string=flash_string, team_name=name))
+            return redirect(url_for('team_profile', team_id=team_id))
 
-    return render_template('team_register.html', error=error, teams=teams, join_team=join_team)
+    return render_template('team_register.html', teams=teams, join_team=join_team)
 
 @app.route('/users', methods=['GET'])
 def all_users():
     if g.user:
-	users = query_db('select * from user')
-	return render_template('users.html', users=users)
+        users = query_db('select * from user')
+        return render_template('users.html', users=users)
     else:
-	flash('You need to be logged in to do that')
-	return redirect(url_for('home'))
+        flash('You need to be logged in to do that')
+        return redirect(url_for('home'))
 
 @app.route('/teams', methods=['GET'])
 def all_teams():
     if g.user:
-	teams = query_db('select * from team')
-	team_data = {}
-	for team in teams:
-	    team_data[team] = len(query_db('''
-		select * from user where team_id = ?''', [team['team_id']]))
-	return render_template('teams.html', teams=teams, team_data=team_data)
-    else:
-	flash('You need to be logged in to do that')
-	return redirect(url_for('home'))
+        teams = query_db('select t.team_id, t.name, count(u.user_id) as size from team t left join user u on t.team_id=u.team_id group by u.user_id order by size, t.name')
+        return render_template('teams.html', teams=teams)
 
 @app.route('/faq', methods=['GET'])
 def faq():
@@ -382,10 +377,10 @@ def register():
         return redirect(url_for('profile'))
     error = None
     if request.method == 'POST':
-	if not request.form['name']:
-	    error = 'You have to enter a valid name'
-	elif len(request.form['name']) > 52:
-	    error = 'Name must be less than 52 characters'
+        if not request.form['name']:
+            error = 'You have to enter a valid name'
+        elif len(request.form['name']) > 52:
+            error = 'Name must be less than 52 characters'
         elif not request.form['email']:
             error = 'You have to enter a valid email address'
         elif not request.form['password']:
@@ -394,51 +389,53 @@ def register():
             error = 'The two passwords do not match'
         elif get_user_id(request.form['email']) is not None:
             error = 'The email is already registered'
-	elif 'shirtsize' not in request.form:
-	    error = 'You need to pick a t-shirt size.'
+        elif 'shirtsize' not in request.form:
+            error = 'You need to pick a t-shirt size.'
         else:
             db = get_db()
             db.execute('''insert into user (
               name, email, shirt_size, pw_hash, learn) values (?, ?, ?, ?, ?)''',
               [request.form['name'], request.form['email'], request.form['shirtsize'],
                generate_password_hash(request.form['password']), \
-		       1 if 'learn' in request.form else 0])
+                       1 if 'learn' in request.form else 0])
             db.commit()
             flash('Registration successful. You are now logged in.')
-	    user = query_db('''select * from user where email = ?
-		    ''', [request.form['email']], one=True)
+            user = query_db('''select * from user where email = ?
+                    ''', [request.form['email']], one=True)
             session['user_id'] = user['user_id']
             return redirect(url_for('home'))
-    return render_template('register.html', error=error)
+    if error:
+        flash(error)
+    return render_template('register.html')
 
 
 @app.route('/find_team')
 def find_team():
     if not g.user:
-	flash('You need to be logged in to do that.')
-	return redirect(url_for('home'))
+        flash('You need to be logged in to do that.')
+        return redirect(url_for('home'))
     elif g.user['team_id']:
-	flash('You are already on a team.')
-	return redirect(url_for('home'))
+        flash('You are already on a team.')
+        return redirect(url_for('home'))
     else:
-	teams = query_db('select t.team_id, t.name, t.skills, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
-	return render_template('find_team.html', teams=teams)
-	# select all teams who are looking for people
-	# pass them to template :)
+        # select all teams who are looking for people
+        # pass them to template :)
+        teams = query_db('select t.team_id, t.name, t.skills, count(u.user_id) as user_count from team t left join user u on t.team_id=u.team_id where t.looking = 1 group by t.team_id having user_count < 5')
+        return render_template('find_team.html', teams=teams)
 
 @app.route('/admin')
 def admin():
-    if not is_admin(g.user['email']):
-	flash("You are not an administrator.")
-	return render_template('home.html')
+    if not g.user or not is_admin(g.user['email']):
+        flash("You are not an administrator.")
+        return render_template('home.html')
     else:
-	user_data = {}
-	users = query_db('select * from user')
-	for user in users:
-	    if user['team_id']:
-		user_data[user['user_id']] = query_db('''
-		select * from team where team_id = ?''', [user['team_id']], one=True)
-	return render_template('admin.html', users=users, user_data=user_data)
+        user_data = {}
+        users = query_db('select * from user')
+        for user in users:
+            if user['team_id']:
+                user_data[user['user_id']] = query_db('''
+                select * from team where team_id = ?''', [user['team_id']], one=True)
+        return render_template('admin.html', users=users, user_data=user_data)
 
 @app.route('/logout')
 def logout():
@@ -449,15 +446,17 @@ def logout():
 
 def possess(name):
     if name[-1] == 's':
-	return ''.join([name, '\''])
+        return ''.join([name, '\''])
     else:
-	return ''.join([name, '\'s'])
+        return ''.join([name, '\'s'])
 
 def user_count():
-    return len(query_db("select * from user"))
+    # Don't ask me why [0] is needed and not .count
+    return query_db("select count(*) from user", one=True)[0]
 
 def team_count():
-    return len(query_db("select * from team"))
+    # Don't ask me why [0] is needed and not .count
+    return query_db("select count(*) from team", one=True)[0]
 
 def is_admin(email):
     return email in admin_emails
