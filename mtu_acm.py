@@ -132,6 +132,10 @@ def user_profile(user_id):
 	return render_template('profile.html', profile_user=profile_user,
 		profile_user_team=profile_user_team, shirt_size=profile_user['shirt_size'], learn=profile_user['learn'])
 
+@app.route('/schedule', methods=['GET'])
+def schedule():
+    return render_template('schedule.html')
+
 @app.route('/user/<int:user_id>/delete', methods=['GET'])
 def delete_user(user_id):
     if is_admin(g.user['email']):
@@ -381,7 +385,7 @@ def register():
 	if not request.form['name']:
 	    error = 'You have to enter a valid name'
 	elif len(request.form['name']) > 52:
-	    error = 'Name must be less than 52 characters' 
+	    error = 'Name must be less than 52 characters'
         elif not request.form['email']:
             error = 'You have to enter a valid email address'
         elif not request.form['password']:
