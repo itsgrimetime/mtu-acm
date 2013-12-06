@@ -144,14 +144,28 @@ def rules():
 def delete_user(user_id):
     if is_admin(g.user['email']):
         db = get_db()
+        user = query_db('select * from user where user_id = ?', [user_id], one=True)
         db.execute('delete from user where user_id = ?', [user_id])
         db.commit()
+        flash("User {user_name} deleted. Hope you really wanted to do that.".format(user_name=user['name']))
         return redirect(url_for('admin'))
     else:
         flash("You are not an administrator.")
         return redirect(url_for('home'))
 
-
+@app.route('/team/<int:team_id>/delete', methods=['GET'])
+def delete_team(team_id):
+    if is_admin(g.user['email']):
+        db = get_db()
+        team = query_db('select * from team where team_id = ?', [team_id], one=True)
+        db.execute('delete from team where team_id = ?', [team_id])
+        db.execute('update user set team_id = ? where team_id = ?', [None, team_id])
+        db.commit()
+        flash("Team {team_name} deleted. Hope you really wanted to do that.".format(team_name=team['name']))
+        return redirect(url_for('admin'))
+    else:
+        flash("You are not an administrator.")
+        return redirect(url_for('home'))
 
 @app.route('/team/<int:team_id>/leave', methods=['GET'])
 def leave_team(team_id):
@@ -443,11 +457,11 @@ def admin():
             team_data[team['team_id']] = []
         for user in users:
             if user['team_id']:
+                print "adding"
                 team_data[user['team_id']].append(user)
 
         for user in users:
             if user['team_id']:
-                print "user has a team"
                 user_data[user['user_id']] = query_db('''
                 select * from team where team_id = ?''', [user['team_id']], one=True)
 

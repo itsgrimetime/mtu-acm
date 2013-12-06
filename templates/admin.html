@@ -50,10 +50,10 @@ Admin Panel
             <tr>
                 <td>{{ team.team_id }}</td>
                 <td><a href={{ url_for('team_profile', team_id=team.team_id) }}>{{ team.name }}</a></td>
-                <td>{{ team_data[team.name] | length }}</td>
+                <td>{{ team_data[team.team_id] | count() }}</td>
                 <td>{% if team.looking %} Yes {% else %} No {% endif %}</td>
                 <td>{% if team.hardware %} Yes {% else %} No {% endif %}</td>
-                <td>Delete Team</td>
+                <td><a href={{ url_for('delete_team', team_id=team.team_id) }}>Delete Team</a></td>
             </tr>
             {% endfor %}
         </table>
